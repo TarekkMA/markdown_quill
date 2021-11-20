@@ -82,6 +82,7 @@ class MarkdownToDelta extends Converter<String, Delta>
   final _topLevelNodes = <md.Node>[];
   bool _isInBlockquote = false;
   bool _isInCodeblock = false;
+  bool _justPreviousBlockExit = false;
   String? _lastTag;
   String? _currentBlockTag;
 
@@ -95,6 +96,7 @@ class MarkdownToDelta extends Converter<String, Delta>
     _currentBlockTag = null;
     _isInBlockquote = false;
     _isInCodeblock = false;
+    _justPreviousBlockExit = false;
 
     final lines = const LineSplitter().convert(input);
     final mdNodes = markdownDocument.parseLines(lines);
@@ -133,7 +135,10 @@ class MarkdownToDelta extends Converter<String, Delta>
     }
 
     if (renderedText.contains('\n')) {
-      final lines = renderedText.split('\n');
+      var lines = renderedText.split('\n');
+      if (renderedText.endsWith('\n')) {
+        lines = lines.sublist(0, lines.length - 1);
+      }
       for (var i = 0; i < lines.length; i++) {
         final isLastItem = i == lines.length - 1;
         final line = lines[i];
@@ -146,10 +151,13 @@ class MarkdownToDelta extends Converter<String, Delta>
       _delta.insert(renderedText, _effectiveInlineAttrs());
     }
     _lastTag = null;
+    _justPreviousBlockExit = false;
   }
 
   @override
   bool visitElementBefore(md.Element element) {
+    _insertNewLineBeforeElementIfNeeded(element);
+
     final tag = element.tag;
     _currentBlockTag ??= tag;
     _lastTag = tag;
@@ -184,9 +192,9 @@ class MarkdownToDelta extends Converter<String, Delta>
       _delta.insert('\n');
     }
 
-    if (_isTopLevelNode(element) || _haveBlockAttrs(element)) {
-      _delta.insert('\n', _effectiveBlockAttrs());
-    }
+    // exit block with new line
+    // hr need to be followed by new line
+    _insertNewLineAfterElementIfNeeded(element);
 
     if (tag == 'blockquote') {
       _isInBlockquote = false;
@@ -208,6 +216,38 @@ class MarkdownToDelta extends Converter<String, Delta>
       _currentBlockTag = null;
     }
     _lastTag = tag;
+  }
+
+  void _insertNewLine() {
+    _delta.insert('\n', _effectiveBlockAttrs());
+  }
+
+  void _insertNewLineBeforeElementIfNeeded(md.Element element) {
+    if (!_isInBlockquote && _lastTag == 'blockquote' && element.tag == 'blockquote') {
+      _insertNewLine();
+      return;
+    }
+
+    if (!_isInCodeblock && _lastTag == 'pre' && element.tag == 'pre') {
+      _insertNewLine();
+      return;
+    }
+  }
+
+  void _insertNewLineAfterElementIfNeeded(md.Element element) {
+    if (element.tag == 'hr') {
+      // Always add new line after divider
+      _justPreviousBlockExit = true;
+      _insertNewLine();
+      return;
+    }
+
+    if (!_justPreviousBlockExit &&
+        (_isTopLevelNode(element) || _haveBlockAttrs(element))) {
+      _justPreviousBlockExit = true;
+      _insertNewLine();
+      return;
+    }
   }
 
   bool _isTopLevelNode(md.Node node) => _topLevelNodes.contains(node);

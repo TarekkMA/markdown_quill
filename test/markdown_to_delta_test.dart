@@ -68,6 +68,20 @@ void main() {
     );
   });
 
+  test('exclusive blocks new line', () {
+    mdToDeltaCheck(
+      '''
+> # Hello
+# World''',
+      [
+        Operation.insert('Hello'),
+        Operation.insert('\n', Attribute.blockQuote.toJson()),
+        Operation.insert('World'),
+        Operation.insert('\n', Attribute.h1.toJson()),
+      ],
+    );
+  });
+
   group('friebetill/delta_markdown tests', () {
     test('Works on one line strings', () {
       mdToDeltaCheck(
@@ -1002,6 +1016,229 @@ aaa
             Operation.insert('bar'),
             Operation.insert('\n', Attribute.blockQuote.toJson()),
             Operation.insert('baz'),
+            Operation.insert('\n', Attribute.blockQuote.toJson()),
+          ],
+        );
+      });
+
+      test('207', () {
+        mdToDeltaCheck(
+          '''
+># Foo
+>bar
+> baz''',
+          [
+            Operation.insert('Foo'),
+            Operation.insert('\n', Attribute.blockQuote.toJson()),
+            Operation.insert('bar'),
+            Operation.insert('\n', Attribute.blockQuote.toJson()),
+            Operation.insert('baz'),
+            Operation.insert('\n', Attribute.blockQuote.toJson()),
+          ],
+        );
+      });
+
+      test('208', () {
+        mdToDeltaCheck(
+          '''
+   > # Foo
+   > bar
+ > baz
+''',
+          [
+            Operation.insert('Foo'),
+            Operation.insert('\n', Attribute.blockQuote.toJson()),
+            Operation.insert('bar'),
+            Operation.insert('\n', Attribute.blockQuote.toJson()),
+            Operation.insert('baz'),
+            Operation.insert('\n', Attribute.blockQuote.toJson()),
+          ],
+        );
+      });
+
+      test('209', () {
+        mdToDeltaCheck(
+          '''
+    > # Foo
+    > bar
+    > baz
+''',
+          [
+            Operation.insert('> # Foo'),
+            Operation.insert('\n', Attribute.codeBlock.toJson()),
+            Operation.insert('> bar'),
+            Operation.insert('\n', Attribute.codeBlock.toJson()),
+            Operation.insert('> baz'),
+            Operation.insert('\n', Attribute.codeBlock.toJson()),
+          ],
+        );
+      });
+
+      test('210', () {
+        mdToDeltaCheck(
+          '''
+> # Foo
+> bar
+baz
+''',
+          [
+            Operation.insert('Foo'),
+            Operation.insert('\n', Attribute.blockQuote.toJson()),
+            Operation.insert('bar'),
+            Operation.insert('\n', Attribute.blockQuote.toJson()),
+            Operation.insert('baz'),
+            Operation.insert('\n', Attribute.blockQuote.toJson()),
+          ],
+        );
+      });
+
+      test('211', () {
+        mdToDeltaCheck(
+          '''
+> bar
+baz
+> foo
+''',
+          [
+            Operation.insert('bar'),
+            Operation.insert('\n', Attribute.blockQuote.toJson()),
+            Operation.insert('baz'),
+            Operation.insert('\n', Attribute.blockQuote.toJson()),
+            Operation.insert('foo'),
+            Operation.insert('\n', Attribute.blockQuote.toJson()),
+          ],
+        );
+      });
+      test('212', () {
+        mdToDeltaCheck(
+          '''
+> foo
+---
+''',
+          [
+            Operation.insert('foo'),
+            Operation.insert('\n', Attribute.blockQuote.toJson()),
+            Operation.insert(BlockEmbed.horizontalRule.toJson()),
+            Operation.insert('\n'),
+          ],
+        );
+      });
+      test('213', () {
+        mdToDeltaCheck(
+          '''
+> - foo
+- bar
+''',
+          [
+            Operation.insert('foo'),
+            Operation.insert('\n', Attribute.blockQuote.toJson()),
+            Operation.insert('bar'),
+            Operation.insert('\n', Attribute.ul.toJson()),
+          ],
+        );
+      });
+      test('214', () {
+        mdToDeltaCheck(
+          '''
+>     foo
+    bar
+''',
+          [
+            Operation.insert('foo'),
+            Operation.insert('\n', Attribute.blockQuote.toJson()),
+            Operation.insert('bar'),
+            Operation.insert('\n', Attribute.codeBlock.toJson()),
+          ],
+        );
+      });
+      test('215', () {
+        mdToDeltaCheck(
+          '''
+> ```
+foo
+```
+''',
+          [
+            Operation.insert('foo'),
+            Operation.insert('\n', Attribute.blockQuote.toJson()),
+          ],
+        );
+      }, skip: true);
+      test('217', () {
+        mdToDeltaCheck(
+          '''
+>
+''',
+          [
+            Operation.insert('\n', Attribute.blockQuote.toJson()),
+          ],
+        );
+      });
+      test('218', () {
+        mdToDeltaCheck(
+          '''
+>
+>  
+> 
+''',
+          [
+            Operation.insert('\n', Attribute.blockQuote.toJson()),
+          ],
+        );
+      });
+      test('219', () {
+        mdToDeltaCheck(
+          '''
+>
+> foo
+>  
+''',
+          [
+            Operation.insert('foo'),
+            Operation.insert('\n', Attribute.blockQuote.toJson()),
+          ],
+        );
+      });
+      test('220', () {
+        mdToDeltaCheck(
+          '''
+> foo
+
+> bar
+''',
+          [
+            Operation.insert('foo'),
+            Operation.insert('\n', Attribute.blockQuote.toJson()),
+            Operation.insert('\n'),
+            Operation.insert('bar'),
+            Operation.insert('\n', Attribute.blockQuote.toJson()),
+          ],
+        );
+      });
+      test('223', () {
+        mdToDeltaCheck(
+          '''
+foo
+> bar
+''',
+          [
+            Operation.insert('foo'),
+            Operation.insert('\n'),
+            Operation.insert('bar'),
+            Operation.insert('\n', Attribute.blockQuote.toJson()),
+          ],
+        );
+      });
+      test('228', () {
+        mdToDeltaCheck(
+          '''
+> > > foo
+bar
+''',
+          [
+            Operation.insert('foo'),
+            Operation.insert('\n', Attribute.blockQuote.toJson()),
+            Operation.insert('bar'),
             Operation.insert('\n', Attribute.blockQuote.toJson()),
           ],
         );
