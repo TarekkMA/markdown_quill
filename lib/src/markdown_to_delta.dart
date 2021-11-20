@@ -145,12 +145,14 @@ class MarkdownToDelta extends Converter<String, Delta>
     } else {
       _delta.insert(renderedText, _effectiveInlineAttrs());
     }
+    _lastTag = null;
   }
 
   @override
   bool visitElementBefore(md.Element element) {
     final tag = element.tag;
     _currentBlockTag ??= tag;
+    _lastTag = tag;
 
     if (_haveBlockAttrs(element)) {
       _activeBlockAttributes.addLast(_toBlockAttribute(element));
@@ -182,7 +184,7 @@ class MarkdownToDelta extends Converter<String, Delta>
       _delta.insert('\n');
     }
 
-    if (_isTopLevelNode(element)) {
+    if (_isTopLevelNode(element) || _haveBlockAttrs(element)) {
       _delta.insert('\n', _effectiveBlockAttrs());
     }
 
@@ -214,7 +216,7 @@ class MarkdownToDelta extends Converter<String, Delta>
     if (_activeBlockAttributes.isEmpty) return null;
     final attrsRespectingExclusivity = <Attribute>[];
 
-    for (final attr in _activeBlockAttributes.toList().reversed) {
+    for (final attr in _activeBlockAttributes) {
       final isExclusiveAttr = Attribute.exclusiveBlockKeys.contains(
         attr.key,
       );
@@ -255,8 +257,7 @@ class MarkdownToDelta extends Converter<String, Delta>
 
     // Leading spaces following a hard line break are ignored.
     // https://github.github.com/gfm/#example-657
-    if (_lastTag == 'br' ||
-        const ['p', 'ol', 'li'].contains(_currentBlockTag)) {
+    if (const ['p', 'ol', 'li', 'br'].contains(_lastTag)) {
       result = result.replaceAll(_leadingSpacesPattern, '');
     }
 

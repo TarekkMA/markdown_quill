@@ -866,7 +866,7 @@ with blank line'
             Operation.insert('\n'),
           ],
         );
-      });
+      }, skip: true);
     });
 
     group('4.8 Paragraphs', () {
@@ -916,6 +916,93 @@ bbb''',
  bbb''',
           [
             Operation.insert('aaa bbb\n'),
+          ],
+        );
+      });
+      test('193', () {
+        mdToDeltaCheck(
+          '''
+aaa
+             bbb
+                                       ccc''',
+          [
+            Operation.insert('aaa bbb ccc\n'),
+          ],
+        );
+      });
+      test('194', () {
+        mdToDeltaCheck(
+          '''
+   aaa
+bbb''',
+          [
+            Operation.insert('aaa bbb\n'),
+          ],
+        );
+      });
+      test('195', () {
+        mdToDeltaCheck(
+          '''
+    aaa
+bbb''',
+          [
+            Operation.insert('aaa'),
+            Operation.insert('\n', Attribute.codeBlock.toJson()),
+            Operation.insert('bbb\n'),
+          ],
+        );
+      });
+      test('196', () {
+        mdToDeltaCheck(
+          '''
+aaa     
+bbb     ''',
+          [
+            Operation.insert('aaa\n'),
+            Operation.insert('bbb\n'),
+          ],
+        );
+      });
+    });
+    group('4.9 Blank lines ', () {
+      test('197', () {
+        mdToDeltaCheck(
+          '''
+
+
+  
+
+aaa
+  
+
+# aaa
+
+  
+
+''',
+          [
+            Operation.insert('aaa\n'),
+            Operation.insert('aaa'),
+            Operation.insert('\n', Attribute.h1.toJson()),
+          ],
+        );
+      });
+    });
+    group('5.1 Block quotes', () {
+      // EXCLUSIVE BLOCKS
+      test('206', () {
+        mdToDeltaCheck(
+          '''
+> # Foo
+> bar
+> baz''',
+          [
+            Operation.insert('Foo'),
+            Operation.insert('\n', Attribute.blockQuote.toJson()),
+            Operation.insert('bar'),
+            Operation.insert('\n', Attribute.blockQuote.toJson()),
+            Operation.insert('baz'),
+            Operation.insert('\n', Attribute.blockQuote.toJson()),
           ],
         );
       });
