@@ -79,8 +79,8 @@ class _NodeVisitorImpl implements _NodeVisitor<StringSink> {
 
   final Map<String, _AttributeHandler> _textAttrsHandlers = {
     Attribute.italic.key: _AttributeHandler(
-      beforeContent: (attribute, attributes, output) => output.write('*'),
-      afterContent: (attribute, attributes, output) => output.write('*'),
+      beforeContent: (attribute, attributes, output) => output.write('_'),
+      afterContent: (attribute, attributes, output) => output.write('_'),
     ),
     Attribute.bold.key: _AttributeHandler(
       beforeContent: (attribute, attributes, output) => output.write('**'),
@@ -175,7 +175,8 @@ class _NodeVisitorImpl implements _NodeVisitor<StringSink> {
   ) {
     final handlersToUse = style.attributes.entries
         .where((entry) => handlers.containsKey(entry.key))
-        .map((entry) => MapEntry(entry.key, handlers[entry.key]!));
+        .map((entry) => MapEntry(entry.key, handlers[entry.key]!))
+        .toList();
     final attrs = style.attributes;
     for (final handlerEntry in handlersToUse) {
       handlerEntry.value.beforeContent?.call(
@@ -185,7 +186,7 @@ class _NodeVisitorImpl implements _NodeVisitor<StringSink> {
       );
     }
     contentHandler();
-    for (final handlerEntry in handlersToUse) {
+    for (final handlerEntry in handlersToUse.reversed) {
       handlerEntry.value.afterContent?.call(
         attrs[handlerEntry.key]!,
         attrs,
