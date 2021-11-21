@@ -27,6 +27,12 @@ List<Operation> fromOps(List<Operation> ops) {
   return delta.toList();
 }
 
+Map<String, dynamic> attrsToJson(List<Attribute> attrs) {
+  return <String, dynamic>{
+    for (final attr in attrs) ...attr.toJson(),
+  };
+}
+
 void main() {
   test('Empty String', () {
     mdToDeltaCheck(
@@ -286,8 +292,8 @@ void main() {
       mdToDeltaCheck(
         '_**Foo**_\n',
         [
-          Operation.insert('Foo',
-              Attribute.bold.toJson()..addAll(Attribute.italic.toJson())),
+          Operation.insert(
+              'Foo', attrsToJson([Attribute.bold, Attribute.italic])),
           Operation.insert('\n'),
         ],
       );
@@ -1240,6 +1246,140 @@ bar
             Operation.insert('\n', Attribute.blockQuote.toJson()),
             Operation.insert('bar'),
             Operation.insert('\n', Attribute.blockQuote.toJson()),
+          ],
+        );
+      });
+    });
+    group('5.4 Lists', () {
+      test('281', () {
+        mdToDeltaCheck(
+          '''
+- foo
+- bar
++ baz''',
+          [
+            Operation.insert('foo'),
+            Operation.insert('\n', Attribute.ul.toJson()),
+            Operation.insert('bar'),
+            Operation.insert('\n', Attribute.ul.toJson()),
+            Operation.insert('baz'),
+            Operation.insert('\n', Attribute.ul.toJson()),
+          ],
+        );
+      });
+      test('282', () {
+        mdToDeltaCheck(
+          '''
+1. foo
+2. bar
+3) baz''',
+          [
+            Operation.insert('foo'),
+            Operation.insert('\n', Attribute.ol.toJson()),
+            Operation.insert('bar'),
+            Operation.insert('\n', Attribute.ol.toJson()),
+            Operation.insert('baz'),
+            Operation.insert('\n', Attribute.ol.toJson()),
+          ],
+        );
+      });
+      test('283', () {
+        mdToDeltaCheck(
+          '''
+Foo
+- bar
+- baz''',
+          [
+            Operation.insert('Foo'),
+            Operation.insert('\n'),
+            Operation.insert('bar'),
+            Operation.insert('\n', Attribute.ul.toJson()),
+            Operation.insert('baz'),
+            Operation.insert('\n', Attribute.ul.toJson()),
+          ],
+        );
+      });
+      // issue with parser
+      test('284', () {
+        mdToDeltaCheck(
+          '''
+The number of windows in my house is
+14.  The number of doors is 6.''',
+          [
+            Operation.insert(
+                'The number of windows in my house is 14.  The number of doors is 6.'),
+            Operation.insert('\n'),
+          ],
+        );
+      }, skip: true);
+      test('286', () {
+        mdToDeltaCheck(
+          '''
+- foo
+
+- bar
+
+
+- baz''',
+          [
+            Operation.insert('foo'),
+            Operation.insert('\n', Attribute.ul.toJson()),
+            Operation.insert('bar'),
+            Operation.insert('\n', Attribute.ul.toJson()),
+            Operation.insert('baz'),
+            Operation.insert('\n', Attribute.ul.toJson()),
+          ],
+        );
+      });
+      test('287', () {
+        mdToDeltaCheck(
+          '''
+- foo
+  - bar
+    - baz''',
+          [
+            Operation.insert('foo'),
+            Operation.insert('\n', Attribute.ul.toJson()),
+            Operation.insert('bar'),
+            Operation.insert(
+                '\n', attrsToJson([Attribute.ul, IndentAttribute(level: 1)])),
+            Operation.insert('baz'),
+            Operation.insert(
+                '\n', attrsToJson([Attribute.ul, IndentAttribute(level: 2)])),
+          ],
+        );
+      });
+      test('306', () {
+        mdToDeltaCheck(
+          '''
+- a
+  - b
+  - c
+
+- d
+  - e
+  - f''',
+          [
+            Operation.insert('a'),
+            Operation.insert('\n', Attribute.ul.toJson()),
+            Operation.insert('b'),
+            Operation.insert(
+              '\n',
+              attrsToJson([Attribute.ul, IndentAttribute(level: 1)]),
+            ),
+            Operation.insert('c'),
+            Operation.insert(
+              '\n',
+              attrsToJson([Attribute.ul, IndentAttribute(level: 1)]),
+            ),
+            Operation.insert('d'),
+            Operation.insert('\n', Attribute.ul.toJson()),
+            Operation.insert('e'),
+            Operation.insert(
+                '\n', attrsToJson([Attribute.ul, IndentAttribute(level: 1)])),
+            Operation.insert('f'),
+            Operation.insert(
+                '\n', attrsToJson([Attribute.ul, IndentAttribute(level: 1)])),
           ],
         );
       });

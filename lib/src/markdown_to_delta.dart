@@ -85,6 +85,7 @@ class MarkdownToDelta extends Converter<String, Delta>
   bool _justPreviousBlockExit = false;
   String? _lastTag;
   String? _currentBlockTag;
+  int _listItemIndent = -1;
 
   @override
   Delta convert(String input) {
@@ -97,6 +98,7 @@ class MarkdownToDelta extends Converter<String, Delta>
     _isInBlockquote = false;
     _isInCodeblock = false;
     _justPreviousBlockExit = false;
+    _listItemIndent = -1;
 
     final lines = const LineSplitter().convert(input);
     final mdNodes = markdownDocument.parseLines(lines);
@@ -177,6 +179,10 @@ class MarkdownToDelta extends Converter<String, Delta>
       _isInCodeblock = true;
     }
 
+    if (tag == 'li') {
+      _listItemIndent++;
+    }
+
     return true;
   }
 
@@ -204,6 +210,10 @@ class MarkdownToDelta extends Converter<String, Delta>
       _isInCodeblock = false;
     }
 
+    if (tag == 'li') {
+      _listItemIndent--;
+    }
+
     if (_haveBlockAttrs(element)) {
       _activeBlockAttributes.removeLast();
     }
@@ -223,12 +233,19 @@ class MarkdownToDelta extends Converter<String, Delta>
   }
 
   void _insertNewLineBeforeElementIfNeeded(md.Element element) {
-    if (!_isInBlockquote && _lastTag == 'blockquote' && element.tag == 'blockquote') {
+    if (!_isInBlockquote &&
+        _lastTag == 'blockquote' &&
+        element.tag == 'blockquote') {
       _insertNewLine();
       return;
     }
 
     if (!_isInCodeblock && _lastTag == 'pre' && element.tag == 'pre') {
+      _insertNewLine();
+      return;
+    }
+
+    if (_listItemIndent >= 0 && (element.tag == 'ul' || element.tag == 'ol')) {
       _insertNewLine();
       return;
     }
@@ -243,7 +260,9 @@ class MarkdownToDelta extends Converter<String, Delta>
     }
 
     if (!_justPreviousBlockExit &&
-        (_isTopLevelNode(element) || _haveBlockAttrs(element))) {
+        (_isTopLevelNode(element) ||
+            _haveBlockAttrs(element) ||
+            element.tag == 'li')) {
       _justPreviousBlockExit = true;
       _insertNewLine();
       return;
@@ -254,14 +273,16 @@ class MarkdownToDelta extends Converter<String, Delta>
 
   Map<String, dynamic>? _effectiveBlockAttrs() {
     if (_activeBlockAttributes.isEmpty) return null;
-    final attrsRespectingExclusivity = <Attribute>[];
+    final attrsRespectingExclusivity = <Attribute>[
+      if (_listItemIndent > 0) IndentAttribute(level: _listItemIndent),
+    ];
 
     for (final attr in _activeBlockAttributes) {
       final isExclusiveAttr = Attribute.exclusiveBlockKeys.contains(
         attr.key,
       );
       final isThereAlreadyExclusiveAttr = attrsRespectingExclusivity.any(
-        (element) => Attribute.exclusiveBlockKeys.contains(attr.key),
+        (element) => Attribute.exclusiveBlockKeys.contains(element.key),
       );
 
       if (!(isExclusiveAttr && isThereAlreadyExclusiveAttr)) {

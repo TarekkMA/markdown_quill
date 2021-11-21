@@ -3,8 +3,8 @@
 
 ### Block attributes exclusivity
 
-Currently flutter_quill block attributes have restrictions
-on how they will be combined. 
+flutter_quill block attributes have restrictions
+on how they can be combined. 
 
 These block attributes are executive and cannot be combined:
 - Header
@@ -25,3 +25,8 @@ it will be treated as
 > bar
 > baz
 ```
+
+
+## TODO
+
+- Improve the output of `DeltaToMarkdown`
