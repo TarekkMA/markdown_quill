@@ -1,4 +1,3 @@
-import 'dart:collection';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
@@ -132,7 +131,8 @@ class _NodeVisitorImpl implements _NodeVisitor<StringSink> {
         leaf.accept(this, out);
       }
     });
-    if (style.isInline) {
+    if (style.isEmpty ||
+        style.values.every((item) => item.scope != AttributeScope.BLOCK)) {
       out.writeln();
     }
     out.writeln();

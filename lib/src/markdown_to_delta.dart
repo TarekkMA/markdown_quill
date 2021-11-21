@@ -86,6 +86,7 @@ class MarkdownToDelta extends Converter<String, Delta>
   String? _lastTag;
   String? _currentBlockTag;
   int _listItemIndent = -1;
+  int _nestingCounter = 0;
 
   @override
   Delta convert(String input) {
@@ -99,6 +100,7 @@ class MarkdownToDelta extends Converter<String, Delta>
     _isInCodeblock = false;
     _justPreviousBlockExit = false;
     _listItemIndent = -1;
+    _nestingCounter = 0;
 
     final lines = const LineSplitter().convert(input);
     final mdNodes = markdownDocument.parseLines(lines);
@@ -254,6 +256,18 @@ class MarkdownToDelta extends Converter<String, Delta>
   void _insertNewLineAfterElementIfNeeded(md.Element element) {
     if (element.tag == 'hr') {
       // Always add new line after divider
+      _justPreviousBlockExit = true;
+      _insertNewLine();
+      return;
+    }
+
+    // if all the p children are embeddable add a new line
+    // example: images in a single line
+    if (element.tag == 'p' &&
+        (element.children?.every(
+              (child) => child is md.Element && _isEmbedElement(child),
+        ) ??
+            false)) {
       _justPreviousBlockExit = true;
       _insertNewLine();
       return;

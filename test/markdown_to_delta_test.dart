@@ -9,11 +9,10 @@ final _mdDocument = md.Document(
   extensionSet: md.ExtensionSet.gitHubFlavored,
 );
 
-void mdToDeltaCheck(
-  String markdown,
-  List<Operation> ops, [
-  MarkdownToDelta? converter,
-]) {
+void mdToDeltaCheck(String markdown,
+    List<Operation> ops, [
+      MarkdownToDelta? converter,
+    ]) {
   final result = (converter ?? MarkdownToDelta(markdownDocument: _mdDocument))
       .convert(markdown);
   expect(result.toList(), fromOps(ops));
@@ -70,6 +69,58 @@ void main() {
         Operation.insert('\n', Attribute.blockQuote.toJson()),
         Operation.insert("And it's working"), // ending space removed
         Operation.insert('\n', Attribute.blockQuote.toJson()),
+      ],
+    );
+  });
+
+  test('image between texts (same lines)', () {
+    mdToDeltaCheck(
+      '''
+Hello
+![](https://i.imgur.com/yjZ4ljc.jpg)
+Goodbye
+''',
+      [
+        Operation.insert('Hello '),
+        Operation.insert(BlockEmbed.image('https://i.imgur.com/yjZ4ljc.jpg').toJson()),
+        Operation.insert(' Goodbye'),
+        Operation.insert('\n'),
+      ],
+    );
+  });
+
+  test('image between texts (different lines)', () {
+    mdToDeltaCheck(
+      '''
+Hello
+
+![](https://i.imgur.com/yjZ4ljc.jpg)
+
+Goodbye
+''',
+      [
+        Operation.insert('Hello\n'),
+        Operation.insert(BlockEmbed.image('https://i.imgur.com/yjZ4ljc.jpg').toJson()),
+        Operation.insert('\nGoodbye'),
+        Operation.insert('\n'),
+      ],
+    );
+  });
+
+
+  test('3 lines', () {
+    mdToDeltaCheck(
+      '''
+Hello
+
+Tarek
+
+Goodbye
+''',
+      [
+        Operation.insert('Hello\n'),
+        Operation.insert('Tarek\n'),
+        Operation.insert('Goodbye\n'),
       ],
     );
   });
