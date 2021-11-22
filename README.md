@@ -4,6 +4,23 @@
 
 language are currently not preserved
 
+```markdown
+``dart
+void main() {
+    print("Hello\n");
+}
+``
+```
+will be treated as:
+```markdown
+``
+void main() {
+    print("Hello\n");
+}
+``
+```
+
+
 ### Image
 
 Currently this convertor doesn't support image alts, only image src will be retained
