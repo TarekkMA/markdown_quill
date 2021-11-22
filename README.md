@@ -55,4 +55,3 @@ it will be treated as
 ## TODO
 
 - Improve the output of `DeltaToMarkdown`
-- Fix bloc/italic can wrap multiple leafs
