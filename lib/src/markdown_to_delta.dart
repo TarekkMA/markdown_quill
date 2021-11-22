@@ -7,8 +7,8 @@ import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_quill/models/rules/format.dart';
 import 'package:markdown/markdown.dart' as md;
 
-/// Converts markdown [md.Element] to [Attribute].
-typedef ElementToAttributeConvertor = Attribute Function(
+/// Converts markdown [md.Element] to list of [Attribute].
+typedef ElementToAttributeConvertor = List<Attribute> Function(
   Map<String, String> elAttrs,
 );
 
@@ -56,21 +56,21 @@ class MarkdownToDelta extends Converter<String, Delta>
   // ];
 
   final _elementToBlockAttr = <String, ElementToAttributeConvertor>{
-    'ul': (_) => Attribute.ul,
-    'ol': (_) => Attribute.ol,
-    'pre': (_) => Attribute.codeBlock,
-    'blockquote': (_) => Attribute.blockQuote,
-    'h1': (_) => Attribute.h1,
-    'h2': (_) => Attribute.h2,
-    'h3': (_) => Attribute.h3,
+    'ul': (_) => [Attribute.ul],
+    'ol': (_) => [Attribute.ol],
+    'pre': (_) => [Attribute.codeBlock],
+    'blockquote': (_) => [Attribute.blockQuote],
+    'h1': (_) => [Attribute.h1],
+    'h2': (_) => [Attribute.h2],
+    'h3': (_) => [Attribute.h3],
   };
 
   final _elementToInlineAttr = <String, ElementToAttributeConvertor>{
-    'em': (_) => Attribute.italic,
-    'strong': (_) => Attribute.bold,
-    'del': (_) => Attribute.strikeThrough,
-    'a': (elAttrs) => LinkAttribute(elAttrs['href']),
-    'code': (_) => Attribute.inlineCode,
+    'em': (_) => [Attribute.italic],
+    'strong': (_) => [Attribute.bold],
+    'del': (_) => [Attribute.strikeThrough],
+    'a': (elAttrs) => [LinkAttribute(elAttrs['href'])],
+    'code': (_) => [Attribute.inlineCode],
   };
 
   final _elementToEmbed = <String, ElementToEmbeddableConvertor>{
@@ -79,8 +79,8 @@ class MarkdownToDelta extends Converter<String, Delta>
   };
 
   var _delta = Delta();
-  final _activeInlineAttributes = Queue<Attribute>();
-  final _activeBlockAttributes = Queue<Attribute>();
+  final _activeInlineAttributes = Queue<List<Attribute>>();
+  final _activeBlockAttributes = Queue<List<Attribute>>();
   final _topLevelNodes = <md.Node>[];
   bool _isInBlockquote = false;
   bool _isInCodeblock = false;
@@ -169,10 +169,10 @@ class MarkdownToDelta extends Converter<String, Delta>
     _lastTag = tag;
 
     if (_haveBlockAttrs(element)) {
-      _activeBlockAttributes.addLast(_toBlockAttribute(element));
+      _activeBlockAttributes.addLast(_toBlockAttributes(element));
     }
     if (_haveInlineAttrs(element)) {
-      _activeInlineAttributes.addLast(_toInlineAttribute(element));
+      _activeInlineAttributes.addLast(_toInlineAttributes(element));
     }
 
     if (tag == 'blockquote') {
@@ -268,7 +268,7 @@ class MarkdownToDelta extends Converter<String, Delta>
     if (element.tag == 'p' &&
         (element.children?.every(
               (child) => child is md.Element && _isEmbedElement(child),
-        ) ??
+            ) ??
             false)) {
       _justPreviousBlockExit = true;
       _insertNewLine();
@@ -293,7 +293,7 @@ class MarkdownToDelta extends Converter<String, Delta>
       if (_listItemIndent > 0) IndentAttribute(level: _listItemIndent),
     ];
 
-    for (final attr in _activeBlockAttributes) {
+    for (final attr in _activeBlockAttributes.expand((e) => e)) {
       final isExclusiveAttr = Attribute.exclusiveBlockKeys.contains(
         attr.key,
       );
@@ -314,7 +314,9 @@ class MarkdownToDelta extends Converter<String, Delta>
   Map<String, dynamic>? _effectiveInlineAttrs() {
     if (_activeInlineAttributes.isEmpty) return null;
     return <String, dynamic>{
-      for (final a in _activeInlineAttributes) ...a.toJson(),
+      for (final attrs in _activeInlineAttributes)
+        for (final a in attrs)
+          ...a.toJson(),
     };
   }
 
@@ -356,8 +358,8 @@ class MarkdownToDelta extends Converter<String, Delta>
     return _effectiveElementToInlineAttr().containsKey(element.tag);
   }
 
-  Attribute _toInlineAttribute(md.Element element) {
-    Attribute? result;
+  List<Attribute> _toInlineAttributes(md.Element element) {
+    List<Attribute>? result;
     if (!(_isInCodeblock && element.tag == 'code')) {
       result = _effectiveElementToInlineAttr()[element.tag]
           ?.call(element.attributes);
@@ -380,7 +382,7 @@ class MarkdownToDelta extends Converter<String, Delta>
     return _effectiveElementToBlockAttr().containsKey(element.tag);
   }
 
-  Attribute _toBlockAttribute(md.Element element) {
+  List<Attribute> _toBlockAttributes(md.Element element) {
     final result =
         _effectiveElementToBlockAttr()[element.tag]?.call(element.attributes);
     if (result == null) {

@@ -628,9 +628,9 @@ Foo
       final convertor = MarkdownToDelta(
         markdownDocument: _mdDocument,
         customElementToBlockAttribute: {
-          'h4': (_) => HeaderAttribute(level: 4),
-          'h5': (_) => HeaderAttribute(level: 5),
-          'h6': (_) => HeaderAttribute(level: 6),
+          'h4': (_) => [HeaderAttribute(level: 4)],
+          'h5': (_) => [HeaderAttribute(level: 5)],
+          'h6': (_) => [HeaderAttribute(level: 6)],
         },
       );
       test('32', () {

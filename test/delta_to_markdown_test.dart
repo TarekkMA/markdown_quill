@@ -18,9 +18,9 @@ final mdToDelta = MarkdownToDelta(
 
   // some test files contains h4-6
   customElementToBlockAttribute: {
-    'h4': (_) => HeaderAttribute(level: 4),
-    'h5': (_) => HeaderAttribute(level: 5),
-    'h6': (_) => HeaderAttribute(level: 6),
+    'h4': (_) => [HeaderAttribute(level: 4)],
+    'h5': (_) => [HeaderAttribute(level: 5)],
+    'h6': (_) => [HeaderAttribute(level: 6)],
   },
 );
 

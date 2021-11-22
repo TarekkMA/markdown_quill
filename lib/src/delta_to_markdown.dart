@@ -8,6 +8,7 @@ import 'package:flutter_quill/models/documents/nodes/block.dart';
 import 'package:flutter_quill/models/documents/nodes/line.dart';
 import 'package:flutter_quill/models/documents/nodes/node.dart';
 import 'package:flutter_quill/models/documents/style.dart';
+import 'package:quill_markdown/src/custom_quill_attributes.dart';
 
 class _AttributeHandler {
   _AttributeHandler({
@@ -60,7 +61,13 @@ class DeltaToMarkdown extends Converter<Delta, String>
 
   final Map<String, _AttributeHandler> _blockAttrsHandlers = {
     Attribute.codeBlock.key: _AttributeHandler(
-      beforeContent: (attribute, node, output) => output.writeln('```'),
+      beforeContent: (attribute, node, output) {
+        final infoString = node
+                .style.attributes[CodeBlockLanguageAttribute.attrKey]
+                .asNullable<String>() ??
+            '';
+        output.writeln('```$infoString');
+      },
       afterContent: (attribute, node, output) => output.writeln('```'),
     ),
   };
