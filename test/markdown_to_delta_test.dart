@@ -2,6 +2,7 @@ import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:markdown/markdown.dart' as md;
 import 'package:meta/meta.dart';
+import 'package:quill_markdown/src/custom_quill_attributes.dart';
 import 'package:quill_markdown/src/markdown_to_delta.dart';
 
 final _mdDocument = md.Document(
@@ -159,6 +160,34 @@ Goodbye
         Operation.insert('\n', Attribute.blockQuote.toJson()),
         Operation.insert('World'),
         Operation.insert('\n', Attribute.h1.toJson()),
+      ],
+    );
+  });
+
+
+  test('code block with language', () {
+    final styles = <Attribute>[
+      Attribute.codeBlock,
+      CodeBlockLanguageAttribute('java'),
+    ];
+    mdToDeltaCheck(
+      '''
+```java
+public static void main() 
+{
+// comment
+}
+```
+''',
+      [
+        Operation.insert('public static void main() '),
+        Operation.insert('\n', attrsToJson(styles)),
+        Operation.insert('{'),
+        Operation.insert('\n', attrsToJson(styles)),
+        Operation.insert('// comment'),
+        Operation.insert('\n', attrsToJson(styles)),
+        Operation.insert('}'),
+        Operation.insert('\n', attrsToJson(styles)),
       ],
     );
   });

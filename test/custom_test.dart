@@ -36,13 +36,28 @@ void main() {
 
     final delta = mdToDelta.convert(md);
 
-    expect(delta.toList(), fromOps([
-      Operation.insert(EmbeddableTable(md).toJson()),
-      Operation.insert('\n'),
-    ]));
+    expect(
+        delta.toList(),
+        fromOps([
+          Operation.insert(EmbeddableTable(md).toJson()),
+          Operation.insert('\n'),
+        ]));
 
     final mdBackAgain = deltaToMd.convert(delta);
 
     expect(mdBackAgain.trim(), md);
+  });
+
+  test('code block with language', () {
+    mdToDeltaToMdCheck('''
+```dart
+dart code
+```
+```java
+java code
+```
+```
+not specified
+```''');
   });
 }

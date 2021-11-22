@@ -5,6 +5,7 @@ import 'package:collection/src/iterable_extensions.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_quill/models/documents/nodes/block.dart';
+import 'package:flutter_quill/models/documents/nodes/container.dart';
 import 'package:flutter_quill/models/documents/nodes/line.dart';
 import 'package:flutter_quill/models/documents/nodes/node.dart';
 import 'package:flutter_quill/models/documents/style.dart';
@@ -62,10 +63,24 @@ class DeltaToMarkdown extends Converter<Delta, String>
   final Map<String, _AttributeHandler> _blockAttrsHandlers = {
     Attribute.codeBlock.key: _AttributeHandler(
       beforeContent: (attribute, node, output) {
-        final infoString = node
-                .style.attributes[CodeBlockLanguageAttribute.attrKey]
-                .asNullable<String>() ??
-            '';
+        var infoString = '';
+        if (node.containsAttr(CodeBlockLanguageAttribute.attrKey)) {
+          infoString = node.getAttrValueOr(
+            CodeBlockLanguageAttribute.attrKey,
+            '',
+          );
+        }
+        if (infoString.isEmpty) {
+          final linesWithLang = (node as Block).children.where((child) =>
+              child.containsAttr(CodeBlockLanguageAttribute.attrKey));
+          if (linesWithLang.isNotEmpty) {
+            infoString = linesWithLang.first.getAttrValueOr(
+              CodeBlockLanguageAttribute.attrKey,
+              'or',
+            );
+          }
+        }
+
         output.writeln('```$infoString');
       },
       afterContent: (attribute, node, output) => output.writeln('```'),

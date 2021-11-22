@@ -2,20 +2,23 @@ import 'dart:collection';
 import 'dart:convert';
 import 'dart:developer';
 
+import 'package:collection/src/iterable_extensions.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_quill/models/rules/format.dart';
 import 'package:markdown/markdown.dart' as md;
 
+import 'custom_quill_attributes.dart';
+
 /// Converts markdown [md.Element] to list of [Attribute].
 typedef ElementToAttributeConvertor = List<Attribute> Function(
-  Map<String, String> elAttrs,
-);
+    md.Element element,
+    );
 
 /// Converts markdown [md.Element] to [Embeddable].
 typedef ElementToEmbeddableConvertor = Embeddable Function(
-  Map<String, String> elAttrs,
-);
+    Map<String, String> elAttrs,
+    );
 
 /// Convertor from Markdown string to quill [Delta].
 class MarkdownToDelta extends Converter<String, Delta>
@@ -58,7 +61,19 @@ class MarkdownToDelta extends Converter<String, Delta>
   final _elementToBlockAttr = <String, ElementToAttributeConvertor>{
     'ul': (_) => [Attribute.ul],
     'ol': (_) => [Attribute.ol],
-    'pre': (_) => [Attribute.codeBlock],
+    'pre': (element) {
+      final codeChild = element.children!.first as md.Element;
+      final language = (codeChild.attributes['class'] ?? '')
+          .split(' ')
+          .where((class_) => class_.startsWith('language-'))
+          .firstOrNull
+          ?.split('-')
+          .lastOrNull;
+      return [
+        Attribute.codeBlock,
+        if (language != null) CodeBlockLanguageAttribute(language),
+      ];
+    },
     'blockquote': (_) => [Attribute.blockQuote],
     'h1': (_) => [Attribute.h1],
     'h2': (_) => [Attribute.h2],
@@ -69,7 +84,7 @@ class MarkdownToDelta extends Converter<String, Delta>
     'em': (_) => [Attribute.italic],
     'strong': (_) => [Attribute.bold],
     'del': (_) => [Attribute.strikeThrough],
-    'a': (elAttrs) => [LinkAttribute(elAttrs['href'])],
+    'a': (element) => [LinkAttribute(element.attributes['href'])],
     'code': (_) => [Attribute.inlineCode],
   };
 
@@ -268,7 +283,7 @@ class MarkdownToDelta extends Converter<String, Delta>
     if (element.tag == 'p' &&
         (element.children?.every(
               (child) => child is md.Element && _isEmbedElement(child),
-            ) ??
+        ) ??
             false)) {
       _justPreviousBlockExit = true;
       _insertNewLine();
@@ -298,7 +313,7 @@ class MarkdownToDelta extends Converter<String, Delta>
         attr.key,
       );
       final isThereAlreadyExclusiveAttr = attrsRespectingExclusivity.any(
-        (element) => Attribute.exclusiveBlockKeys.contains(element.key),
+            (element) => Attribute.exclusiveBlockKeys.contains(element.key),
       );
 
       if (!(isExclusiveAttr && isThereAlreadyExclusiveAttr)) {
@@ -362,7 +377,7 @@ class MarkdownToDelta extends Converter<String, Delta>
     List<Attribute>? result;
     if (!(_isInCodeblock && element.tag == 'code')) {
       result = _effectiveElementToInlineAttr()[element.tag]
-          ?.call(element.attributes);
+          ?.call(element);
     }
     if (result == null) {
       throw Exception(
@@ -384,7 +399,7 @@ class MarkdownToDelta extends Converter<String, Delta>
 
   List<Attribute> _toBlockAttributes(md.Element element) {
     final result =
-        _effectiveElementToBlockAttr()[element.tag]?.call(element.attributes);
+    _effectiveElementToBlockAttr()[element.tag]?.call(element);
     if (result == null) {
       throw Exception(
           'Element $element cannot be converted to block attribute');
@@ -404,7 +419,7 @@ class MarkdownToDelta extends Converter<String, Delta>
 
   Embeddable _toEmbeddable(md.Element element) {
     final result =
-        _effectiveElementToEmbed()[element.tag]?.call(element.attributes);
+    _effectiveElementToEmbed()[element.tag]?.call(element.attributes);
     if (result == null) {
       throw Exception('Element $element cannot be converted to Embeddable');
     }

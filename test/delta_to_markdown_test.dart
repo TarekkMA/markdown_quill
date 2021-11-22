@@ -35,8 +35,7 @@ void expectEqualMarkdown(String actual, String match) {
   final actualHtml = md.HtmlRenderer().render(actualNodes);
   final matchHtml = md.HtmlRenderer()
       .render(matchNodes)
-      .replaceAll(RegExp('alt=".*?" />'), 'alt="" />')
-      .replaceAll(RegExp(' class=".*?"'), '');
+      .replaceAll(RegExp('alt=".*?" />'), 'alt="" />');
 
   expect(actualHtml, matchHtml);
 }
