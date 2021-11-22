@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_quill/models/documents/nodes/block.dart';
-import 'package:flutter_quill/models/documents/nodes/container.dart';
 import 'package:flutter_quill/models/documents/nodes/line.dart';
 import 'package:flutter_quill/models/documents/nodes/node.dart';
 import 'package:flutter_quill/models/documents/style.dart';
@@ -13,9 +12,9 @@ class DeltaToMarkdown extends Converter<Delta, String> {
   @override
   String convert(Delta input) {
     final quillDocument = Document.fromDelta(input);
-    final root = _Root.fromQuill(quillDocument.root);
+    final visitor = _NodeVisitorImpl();
 
-    final outBuffer = _NodeVisitorImpl().visitRoot(root);
+    final outBuffer = quillDocument.root.accept(visitor);
 
     return outBuffer.toString();
   }
@@ -29,12 +28,13 @@ class _AttributeHandler {
 
   final void Function(
     Attribute<Object?> attribute,
-    Map<String, Attribute<Object?>> attributes,
+    Node node,
     StringSink output,
   )? beforeContent;
+
   final void Function(
     Attribute<Object?> attribute,
-    Map<String, Attribute<Object?>> attributes,
+    Node node,
     StringSink output,
   )? afterContent;
 }
@@ -49,26 +49,25 @@ extension on Object? {
 class _NodeVisitorImpl implements _NodeVisitor<StringSink> {
   final Map<String, _AttributeHandler> _blockAttrsHandlers = {
     Attribute.codeBlock.key: _AttributeHandler(
-      beforeContent: (attribute, attributes, output) => output.writeln('```'),
-      afterContent: (attribute, attributes, output) => output.writeln('```'),
+      beforeContent: (attribute, node, output) => output.writeln('```'),
+      afterContent: (attribute, node, output) => output.writeln('```'),
     ),
   };
 
   final Map<String, _AttributeHandler> _lineAttrsHandlers = {
     Attribute.header.key: _AttributeHandler(
-      beforeContent: (attribute, attributes, output) {
+      beforeContent: (attribute, node, output) {
         output
           ..write('#' * (attribute.value.asNullable<int>() ?? 1))
           ..write(' ');
       },
     ),
     Attribute.blockQuote.key: _AttributeHandler(
-      beforeContent: (attribute, attributes, output) => output.write('> '),
+      beforeContent: (attribute, node, output) => output.write('> '),
     ),
     Attribute.list.key: _AttributeHandler(
-      beforeContent: (attribute, attributes, output) {
-        final indentLevel =
-            attributes[Attribute.indent.key]?.value.asNullable<int>() ?? 0;
+      beforeContent: (attribute, node, output) {
+        final indentLevel = node.getAttrValueOr(Attribute.indent.key, 0);
         final isNumbered = attribute.value == 'ordered';
         output
           ..write((isNumbered ? '   ' : '  ') * indentLevel)
@@ -79,30 +78,70 @@ class _NodeVisitorImpl implements _NodeVisitor<StringSink> {
 
   final Map<String, _AttributeHandler> _textAttrsHandlers = {
     Attribute.italic.key: _AttributeHandler(
-      beforeContent: (attribute, attributes, output) => output.write('_'),
-      afterContent: (attribute, attributes, output) => output.write('_'),
+      beforeContent: (attribute, node, output) {
+        if (node.previous?.containsAttr(attribute.key) != true) {
+          output.write('_');
+        }
+      },
+      afterContent: (attribute, node, output) {
+        if (node.next?.containsAttr(attribute.key) != true) {
+          output.write('_');
+        }
+      },
     ),
     Attribute.bold.key: _AttributeHandler(
-      beforeContent: (attribute, attributes, output) => output.write('**'),
-      afterContent: (attribute, attributes, output) => output.write('**'),
+      beforeContent: (attribute, node, output) {
+        if (node.previous?.containsAttr(attribute.key) != true) {
+          output.write('**');
+        }
+      },
+      afterContent: (attribute, node, output) {
+        if (node.next?.containsAttr(attribute.key) != true) {
+          output.write('**');
+        }
+      },
     ),
     Attribute.strikeThrough.key: _AttributeHandler(
-      beforeContent: (attribute, attributes, output) => output.write('~~'),
-      afterContent: (attribute, attributes, output) => output.write('~~'),
+      beforeContent: (attribute, node, output) {
+        if (node.previous?.containsAttr(attribute.key) != true) {
+          output.write('~~');
+        }
+      },
+      afterContent: (attribute, node, output) {
+        if (node.next?.containsAttr(attribute.key) != true) {
+          output.write('~~');
+        }
+      },
     ),
     Attribute.inlineCode.key: _AttributeHandler(
-      beforeContent: (attribute, attributes, output) => output.write('`'),
-      afterContent: (attribute, attributes, output) => output.write('`'),
+      beforeContent: (attribute, node, output) {
+        if (node.previous?.containsAttr(attribute.key) != true) {
+          output.write('`');
+        }
+      },
+      afterContent: (attribute, node, output) {
+        if (node.next?.containsAttr(attribute.key) != true) {
+          output.write('`');
+        }
+      },
     ),
     Attribute.link.key: _AttributeHandler(
-      beforeContent: (attribute, attributes, output) => output.write('['),
-      afterContent: (attribute, attributes, output) =>
-          output.write('](${attribute.value.asNullable<String>() ?? ''})'),
+      beforeContent: (attribute, node, output) {
+        if (node.previous?.containsAttr(attribute.key, attribute.value) !=
+            true) {
+          output.write('[');
+        }
+      },
+      afterContent: (attribute, node, output) {
+        if (node.next?.containsAttr(attribute.key, attribute.value) != true) {
+          output.write('](${attribute.value.asNullable<String>() ?? ''})');
+        }
+      },
     ),
   };
 
   @override
-  StringSink visitRoot(_Root root, [StringSink? output]) {
+  StringSink visitRoot(Root root, [StringSink? output]) {
     final out = output ??= StringBuffer();
     for (final container in root.children) {
       container.accept(this, out);
@@ -111,10 +150,10 @@ class _NodeVisitorImpl implements _NodeVisitor<StringSink> {
   }
 
   @override
-  StringSink visitBlock(_Block block, [StringSink? output]) {
+  StringSink visitBlock(Block block, [StringSink? output]) {
     final out = output ??= StringBuffer();
     final style = block.style;
-    _handleAttribute(_blockAttrsHandlers, style, output, () {
+    _handleAttribute(_blockAttrsHandlers, block, output, () {
       for (final line in block.children) {
         line.accept(this, out);
       }
@@ -123,10 +162,10 @@ class _NodeVisitorImpl implements _NodeVisitor<StringSink> {
   }
 
   @override
-  StringSink visitLine(_Line line, [StringSink? output]) {
+  StringSink visitLine(Line line, [StringSink? output]) {
     final out = output ??= StringBuffer();
     final style = line.style;
-    _handleAttribute(_lineAttrsHandlers, style, output, () {
+    _handleAttribute(_lineAttrsHandlers, line, output, () {
       for (final leaf in line.children) {
         leaf.accept(this, out);
       }
@@ -140,17 +179,17 @@ class _NodeVisitorImpl implements _NodeVisitor<StringSink> {
   }
 
   @override
-  StringSink visitText(_Text text, [StringSink? output]) {
+  StringSink visitText(Text text, [StringSink? output]) {
     final out = output ??= StringBuffer();
     final style = text.style;
-    _handleAttribute(_textAttrsHandlers, style, output, () {
+    _handleAttribute(_textAttrsHandlers, text, output, () {
       out.write(text.value);
     });
     return out;
   }
 
   @override
-  StringSink visitEmbed(_Embed embed, [StringSink? output]) {
+  StringSink visitEmbed(Embed embed, [StringSink? output]) {
     final out = output ??= StringBuffer();
 
     final type = embed.value.type;
@@ -169,19 +208,19 @@ class _NodeVisitorImpl implements _NodeVisitor<StringSink> {
 
   void _handleAttribute(
     Map<String, _AttributeHandler> handlers,
-    Style style,
+    Node node,
     StringSink output,
     VoidCallback contentHandler,
   ) {
-    final handlersToUse = style.attributes.entries
+    final handlersToUse = node.style.attributes.entries
         .where((entry) => handlers.containsKey(entry.key))
         .map((entry) => MapEntry(entry.key, handlers[entry.key]!))
         .toList();
-    final attrs = style.attributes;
+    final attrs = node.style.attributes;
     for (final handlerEntry in handlersToUse) {
       handlerEntry.value.beforeContent?.call(
         attrs[handlerEntry.key]!,
-        attrs,
+        node,
         output,
       );
     }
@@ -189,7 +228,7 @@ class _NodeVisitorImpl implements _NodeVisitor<StringSink> {
     for (final handlerEntry in handlersToUse.reversed) {
       handlerEntry.value.afterContent?.call(
         attrs[handlerEntry.key]!,
-        attrs,
+        node,
         output,
       );
     }
@@ -202,116 +241,47 @@ class _NodeVisitorImpl implements _NodeVisitor<StringSink> {
 abstract class _NodeVisitor<T> {
   const _NodeVisitor._();
 
-  T visitRoot(_Root root, [T? context]);
+  T visitRoot(Root root, [T? context]);
 
-  T visitBlock(_Block block, [T? context]);
+  T visitBlock(Block block, [T? context]);
 
-  T visitLine(_Line line, [T? context]);
+  T visitLine(Line line, [T? context]);
 
-  T visitText(_Text text, [T? context]);
+  T visitText(Text text, [T? context]);
 
-  T visitEmbed(_Embed embed, [T? context]);
+  T visitEmbed(Embed embed, [T? context]);
 }
 
-abstract class _Node {
-  R accept<R>(_NodeVisitor<R> visitor, [R? context]);
-}
-
-class _Root extends _Node {
-  _Root(this.children, this.style);
-
-  factory _Root.fromQuill(Root root) {
-    return _Root(
-      root.children.cast<Container>().map(_Container.fromQuill).toList(),
-      root.style,
-    );
+extension _NodeX on Node {
+  T accept<T>(_NodeVisitor<T> visitor, [T? context]) {
+    switch (runtimeType) {
+      case Root:
+        return visitor.visitRoot(this as Root, context);
+      case Block:
+        return visitor.visitBlock(this as Block, context);
+      case Line:
+        return visitor.visitLine(this as Line, context);
+      case Text:
+        return visitor.visitText(this as Text, context);
+      case Embed:
+        return visitor.visitEmbed(this as Embed, context);
+    }
+    throw Exception('Container of type $runtimeType cannot be visited');
   }
 
-  final List<_Container> children;
-  final Style style;
-
-  @override
-  R accept<R>(_NodeVisitor<R> visitor, [R? context]) {
-    return visitor.visitRoot(this, context);
-  }
-}
-
-abstract class _Container<T> extends _Node {
-  _Container(this.children, this.style);
-
-  static _Container fromQuill(Container container) {
-    if (container is Line) return _Line.fromQuill(container);
-    if (container is Block) return _Block.fromQuill(container);
-    throw Exception('Unknown type ${container.runtimeType}');
+  bool containsAttr(String attributeKey, [Object? value]) {
+    if (!style.containsKey(attributeKey)) {
+      return false;
+    }
+    if (value == null) {
+      return true;
+    }
+    return style.attributes[attributeKey]!.value == value;
   }
 
-  final List<T> children;
-  final Style style;
-}
-
-class _Block extends _Container<_Line> {
-  _Block(List<_Line> lines, Style style) : super(lines, style);
-
-  factory _Block.fromQuill(Block block) {
-    return _Block(
-      block.children.cast<Line>().map((line) => _Line.fromQuill(line)).toList(),
-      block.style,
-    );
-  }
-
-  @override
-  R accept<R>(_NodeVisitor<R> visitor, [R? context]) {
-    return visitor.visitBlock(this, context);
-  }
-}
-
-class _Line extends _Container<_Leaf> {
-  _Line(List<_Leaf> leafs, Style style) : super(leafs, style);
-
-  factory _Line.fromQuill(Line line) {
-    return _Line(
-      line.children.cast<Leaf>().map(_Leaf.fromQuill).toList(),
-      line.style,
-    );
-  }
-
-  @override
-  R accept<R>(_NodeVisitor<R> visitor, [R? context]) {
-    return visitor.visitLine(this, context);
-  }
-}
-
-abstract class _Leaf<T> extends _Node {
-  _Leaf(this.value, this.style);
-
-  static _Leaf fromQuill(Leaf leaf) {
-    if (leaf is Text) return _Text.fromQuill(leaf);
-    if (leaf is Embed) return _Embed.fromQuill(leaf);
-    throw Exception('Unknown type ${leaf.runtimeType}');
-  }
-
-  final T value;
-  final Style style;
-}
-
-class _Text extends _Leaf<String> {
-  _Text(String value, Style style) : super(value, style);
-
-  factory _Text.fromQuill(Text text) => _Text(text.value, text.style);
-
-  @override
-  R accept<R>(_NodeVisitor<R> visitor, [R? context]) {
-    return visitor.visitText(this, context);
-  }
-}
-
-class _Embed extends _Leaf<Embeddable> {
-  _Embed(Embeddable value, Style style) : super(value, style);
-
-  factory _Embed.fromQuill(Embed embed) => _Embed(embed.value, embed.style);
-
-  @override
-  R accept<R>(_NodeVisitor<R> visitor, [R? context]) {
-    return visitor.visitEmbed(this, context);
+  T getAttrValueOr<T>(String attributeKey, T or) {
+    final attrs = style.attributes;
+    final attrValue = attrs[attributeKey]?.value as T?;
+    return attrValue ?? or;
   }
 }

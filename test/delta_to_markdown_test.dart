@@ -75,6 +75,43 @@ void main() {
     deltaOpsToMdCheck(ops, expected);
   });
 
+  test('nested styles', () {
+    final link = LinkAttribute('http://nested.styles');
+    final bold = Attribute.bold;
+    final italic = Attribute.italic;
+    final striked = Attribute.strikeThrough;
+
+    final ops = [
+      Operation.insert('Ok '),
+      Operation.insert(
+        '321',
+        attrsToJson([link]),
+      ),
+      Operation.insert(
+        'Hello ',
+        attrsToJson([link, bold]),
+      ),
+      Operation.insert(
+        'World',
+        attrsToJson([link, bold, italic, striked]),
+      ),
+      Operation.insert(
+        ' Egypt',
+        attrsToJson([link, bold, italic]),
+      ),
+      Operation.insert(
+        ' !123',
+        attrsToJson([link]),
+      ),
+      Operation.insert(' Done'),
+      Operation.insert('\n'),
+    ];
+    const expected =
+        'Ok [321**Hello _~~World~~ Egypt_** !123](http://nested.styles) Done';
+
+    deltaOpsToMdCheck(ops, expected);
+  });
+
   group('friebetill/delta_markdown tests', () {
     // test('Works on one line strings', () {
     //   const delta = '[{"insert":"Test\\n"}]';
@@ -187,12 +224,13 @@ void main() {
         Operation.insert(
             'Foo',
             attrsToJson([
-              Attribute.bold,
               Attribute.italic,
+              Attribute.bold,
             ])),
         Operation.insert('\n'),
       ];
-      const expected = '_**Foo**_\n';
+      // const expected = '_**Foo**_\n';
+      const expected = '**_Foo_**\n';
 
       deltaOpsToMdCheck(ops, expected);
     });
@@ -336,8 +374,6 @@ void main() {
 
       deltaOpsToMdCheck(ops, expected);
     });
-
-
 
     // test('Works with one image', () {
     //   const delta = r'[{"insert":{"image":"http://image.jpg"}},{"insert":"\n"}]';
