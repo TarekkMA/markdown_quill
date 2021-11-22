@@ -9,19 +9,6 @@ import 'package:flutter_quill/models/documents/nodes/line.dart';
 import 'package:flutter_quill/models/documents/nodes/node.dart';
 import 'package:flutter_quill/models/documents/style.dart';
 
-/// Convertor from [Delta] to quill Markdown string.
-class DeltaToMarkdown extends Converter<Delta, String> {
-  @override
-  String convert(Delta input) {
-    final quillDocument = Document.fromDelta(input);
-    final visitor = _NodeVisitorImpl();
-
-    final outBuffer = quillDocument.root.accept(visitor);
-
-    return outBuffer.toString();
-  }
-}
-
 class _AttributeHandler {
   _AttributeHandler({
     this.beforeContent,
@@ -41,6 +28,8 @@ class _AttributeHandler {
   )? afterContent;
 }
 
+typedef EmbedToMarkdown = void Function(Embed embed, StringSink out);
+
 extension on Object? {
   T? asNullable<T>() {
     final self = this;
@@ -48,7 +37,27 @@ extension on Object? {
   }
 }
 
-class _NodeVisitorImpl implements _NodeVisitor<StringSink> {
+/// Convertor from [Delta] to quill Markdown string.
+class DeltaToMarkdown extends Converter<Delta, String>
+    implements _NodeVisitor<StringSink> {
+  ///
+  DeltaToMarkdown({
+    Map<String, EmbedToMarkdown>? customEmbedHandlers,
+  }) {
+    if (customEmbedHandlers != null) {
+      _embedHandlers.addAll(customEmbedHandlers);
+    }
+  }
+
+  @override
+  String convert(Delta input) {
+    final quillDocument = Document.fromDelta(input);
+
+    final outBuffer = quillDocument.root.accept(this);
+
+    return outBuffer.toString();
+  }
+
   final Map<String, _AttributeHandler> _blockAttrsHandlers = {
     Attribute.codeBlock.key: _AttributeHandler(
       beforeContent: (attribute, node, output) => output.writeln('```'),
@@ -142,6 +151,15 @@ class _NodeVisitorImpl implements _NodeVisitor<StringSink> {
     ),
   };
 
+  final Map<String, EmbedToMarkdown> _embedHandlers = {
+    BlockEmbed.imageType: (embed, out) => out.write('![](${embed.value.data})'),
+    BlockEmbed.horizontalRuleType: (embed, out) {
+      // adds new line after it
+      // make --- separated so it doesn't get rendered as header
+      out.writeln('- - -');
+    },
+  };
+
   @override
   StringSink visitRoot(Root root, [StringSink? output]) {
     final out = output ??= StringBuffer();
@@ -217,13 +235,7 @@ class _NodeVisitorImpl implements _NodeVisitor<StringSink> {
     final type = embed.value.type;
     final dynamic data = embed.value.data;
 
-    if (type == BlockEmbed.imageType) {
-      out.write('![]($data)');
-    } else if (type == BlockEmbed.horizontalRuleType) {
-      // adds new line after it
-      // make --- separated so it doesn't get rendered as header
-      out.writeln('- - -');
-    }
+    _embedHandlers[type]!.call(embed, out);
 
     return out;
   }

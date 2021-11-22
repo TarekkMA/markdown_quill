@@ -24,8 +24,8 @@ final mdToDelta = MarkdownToDelta(
   },
 );
 
-List<md.Node> parseMarkdown(String markdown) {
-  return _mdDocument.parseLines(const LineSplitter().convert(markdown));
+List<md.Node> parseMarkdown(String markdown, [md.Document? document]) {
+  return (document ?? _mdDocument).parseLines(const LineSplitter().convert(markdown));
 }
 
 /// checks the if rendered html of both inputs are equal
