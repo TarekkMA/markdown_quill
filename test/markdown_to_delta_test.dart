@@ -9,10 +9,11 @@ final _mdDocument = md.Document(
   extensionSet: md.ExtensionSet.gitHubFlavored,
 );
 
-void mdToDeltaCheck(String markdown,
-    List<Operation> ops, [
-      MarkdownToDelta? converter,
-    ]) {
+void mdToDeltaCheck(
+  String markdown,
+  List<Operation> ops, [
+  MarkdownToDelta? converter,
+]) {
   final result = (converter ?? MarkdownToDelta(markdownDocument: _mdDocument))
       .convert(markdown);
   expect(result.toList(), fromOps(ops));
@@ -82,7 +83,8 @@ Goodbye
 ''',
       [
         Operation.insert('Hello '),
-        Operation.insert(BlockEmbed.image('https://i.imgur.com/yjZ4ljc.jpg').toJson()),
+        Operation.insert(
+            BlockEmbed.image('https://i.imgur.com/yjZ4ljc.jpg').toJson()),
         Operation.insert(' Goodbye'),
         Operation.insert('\n'),
       ],
@@ -100,13 +102,35 @@ Goodbye
 ''',
       [
         Operation.insert('Hello\n'),
-        Operation.insert(BlockEmbed.image('https://i.imgur.com/yjZ4ljc.jpg').toJson()),
+        Operation.insert(
+            BlockEmbed.image('https://i.imgur.com/yjZ4ljc.jpg').toJson()),
         Operation.insert('\nGoodbye'),
         Operation.insert('\n'),
       ],
     );
   });
 
+  test('escaped ` character', () {
+    const md = r'''
+*   [Going forward, the \`--dev\` flag passed into Substrate nodes will imply \`--tmp\` if a \`--base-path\` is not explicitly provided](https://github.com/paritytech/substrate/pull/9938), meaning all dev chains are now temporary chains by default. To persist a dev chain’s database, pass in the base-path parameter.
+''';
+
+    final link =
+        LinkAttribute('https://github.com/paritytech/substrate/pull/9938');
+
+    mdToDeltaCheck(
+      md,
+      [
+        Operation.insert(
+          'Going forward, the `--dev` flag passed into Substrate nodes will imply `--tmp` if a `--base-path` is not explicitly provided',
+          link.toJson(),
+        ),
+        Operation.insert(
+            ', meaning all dev chains are now temporary chains by default. To persist a dev chain’s database, pass in the base-path parameter.'),
+        Operation.insert('\n', Attribute.ul.toJson()),
+      ],
+    );
+  });
 
   test('3 lines', () {
     mdToDeltaCheck(

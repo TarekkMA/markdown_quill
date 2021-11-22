@@ -1,5 +1,7 @@
+import 'dart:collection';
 import 'dart:convert';
 
+import 'package:collection/src/iterable_extensions.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_quill/models/documents/nodes/block.dart';
@@ -174,6 +176,10 @@ class _NodeVisitorImpl implements _NodeVisitor<StringSink> {
         style.values.every((item) => item.scope != AttributeScope.BLOCK)) {
       out.writeln();
     }
+    if (style.containsKey(Attribute.list.key) &&
+        line.nextLine?.style.containsKey(Attribute.list.key) != true) {
+      out.writeln();
+    }
     out.writeln();
     return out;
   }
@@ -182,9 +188,20 @@ class _NodeVisitorImpl implements _NodeVisitor<StringSink> {
   StringSink visitText(Text text, [StringSink? output]) {
     final out = output ??= StringBuffer();
     final style = text.style;
-    _handleAttribute(_textAttrsHandlers, text, output, () {
-      out.write(text.value);
-    });
+    _handleAttribute(
+      _textAttrsHandlers,
+      text,
+      output,
+      () {
+        out.write(
+          text.value.replaceAllMapped(
+              RegExp(r'[\\\`\*\_\{\}\[\]\(\)\#\+\-\.\!\>\<]'), (match) {
+            return '\\${match[0]}';
+          }),
+        );
+      },
+      sortedAttrsBySpan: true,
+    );
     return out;
   }
 
@@ -210,16 +227,19 @@ class _NodeVisitorImpl implements _NodeVisitor<StringSink> {
     Map<String, _AttributeHandler> handlers,
     Node node,
     StringSink output,
-    VoidCallback contentHandler,
-  ) {
-    final handlersToUse = node.style.attributes.entries
-        .where((entry) => handlers.containsKey(entry.key))
-        .map((entry) => MapEntry(entry.key, handlers[entry.key]!))
+    VoidCallback contentHandler, {
+    bool sortedAttrsBySpan = false,
+  }) {
+    final attrs = sortedAttrsBySpan
+        ? node.attrsSortedByLongestSpan()
+        : node.style.attributes.values.toList();
+    final handlersToUse = attrs
+        .where((attr) => handlers.containsKey(attr.key))
+        .map((attr) => MapEntry(attr.key, handlers[attr.key]!))
         .toList();
-    final attrs = node.style.attributes;
     for (final handlerEntry in handlersToUse) {
       handlerEntry.value.beforeContent?.call(
-        attrs[handlerEntry.key]!,
+        node.style.attributes[handlerEntry.key]!,
         node,
         output,
       );
@@ -227,7 +247,7 @@ class _NodeVisitorImpl implements _NodeVisitor<StringSink> {
     contentHandler();
     for (final handlerEntry in handlersToUse.reversed) {
       handlerEntry.value.afterContent?.call(
-        attrs[handlerEntry.key]!,
+        node.style.attributes[handlerEntry.key]!,
         node,
         output,
       );
@@ -283,5 +303,26 @@ extension _NodeX on Node {
     final attrs = style.attributes;
     final attrValue = attrs[attributeKey]?.value as T?;
     return attrValue ?? or;
+  }
+
+  List<Attribute<Object?>> attrsSortedByLongestSpan() {
+    final attrCount = <Attribute, int>{};
+    Node? node = this;
+    // get the first node
+    while (node?.previous != null) {
+      node = node?.previous;
+    }
+
+    while (node != null) {
+      node.style.attributes.forEach((key, value) {
+        attrCount[value] = (attrCount[value] ?? 0) + 1;
+      });
+      node = node.next;
+    }
+
+    final attrs = style.attributes.values.sorted(
+        (attr1, attr2) => attrCount[attr2]!.compareTo(attrCount[attr1]!));
+
+    return attrs;
   }
 }

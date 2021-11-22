@@ -60,7 +60,7 @@
     
 # ⚙ Core Stack
 
-*   [Going forward, the \\`--dev\\` flag passed into Substrate nodes will imply \\`--tmp\\` if a \\`--base-path\\` is not explicitly provided](https://github.com/paritytech/substrate/pull/9938), meaning all dev chains are now temporary chains by default. To persist a dev chain’s database, pass in the base-path parameter.
+*   [Going forward, the \`--dev\` flag passed into Substrate nodes will imply \`--tmp\` if a \`--base-path\` is not explicitly provided](https://github.com/paritytech/substrate/pull/9938), meaning all dev chains are now temporary chains by default. To persist a dev chain’s database, pass in the base-path parameter.
 *   [Block production speed has been improved](https://github.com/paritytech/substrate/pull/9789) for some edge cases where transactions to be processed are known to be invalid ahead of time.
 *   🐜 There was a bug where the wrong path was used for the parity-db database in Substrate nodes - the same one for RocksDB, meaning an overwrite would happen. [This has been fixed.](https://github.com/paritytech/substrate/pull/9971)
 *   [Transaction priority has been reworked](https://github.com/paritytech/substrate/pull/9834) to favor smaller transactions, plus some other considerations.
@@ -74,8 +74,7 @@
 *   Want to know about awesome projects on and about Substrate? Check [here](https://github.com/substrate-developer-hub/awesome-substrate).
 *   The **Polkadot Hackathon, APAC Edition**, opening ceremony happened on Friday, 22 Oct. You can watch the replay [here](https://www.crowdcast.io/e/apac-hackathon/register).
 *   **Jonas Gehrlein**, one of the researchers at Web3 Foundation, has written up [an analysis](https://polkadot.network/blog/kusama-batch-2-auctions-report/) of the second batch of six auctions on Kusama. 
-*   There are benefits to installing [Polkadot{.js} extension](https://github.com/polkadot-js/extension) to your browser, even if you are not using it to store DOT or KSM. For instance, it blocks any scam sites it knows about automatically.
-    If you find a scam site it doesn't know about, please add it to [the list](https://polkadot.js.org/phishing/) so it blocks the site for others.
+*   There are benefits to installing [Polkadot{.js} extension](https://github.com/polkadot-js/extension) to your browser, even if you are not using it to store DOT or KSM. For instance, it blocks any scam sites it knows about automatically. If you find a scam site it doesn't know about, please add it to [the list](https://polkadot.js.org/phishing/) so it blocks the site for others.
     
 # 🛠 Tools
 
@@ -83,7 +82,7 @@
 *   [The Polkadot JS Apps UI will now show a warning](https://github.com/polkadot-js/apps/pull/6393) if the recipient of a Treasury Tip has no balance and the tip is less than the existential deposit (meaning the funds would be burned). A bug affecting cancelation of multi-sig calls [has been resolved](https://github.com/polkadot-js/apps/issues/6369). The apps suite has been updated to [version 0.98](https://github.com/polkadot-js/apps/releases/tag/v0.98.1).
 *   Ledger imports into the Polkadot JS Extension [will now also cater for the 25th word (passphrase)](https://github.com/polkadot-js/apps/pull/6380), which up until now was not possible.
 *   [Substrate API Sidecar is at version 11](https://github.com/paritytech/substrate-api-sidecar/compare/v11.1.0..v11.0.0), adding an address validation endpoint.
-*   [Polkadot JS API is at 6.5.2](https://github.com/polkadot-js/api/releases/tag/v6.5.2), adding fixes for historical \\`at\\` queries on top of 6.5.1
+*   [Polkadot JS API is at 6.5.2](https://github.com/polkadot-js/api/releases/tag/v6.5.2), adding fixes for historical \`at\` queries on top of 6.5.1
     
 
 # 🌠 NFT Review
