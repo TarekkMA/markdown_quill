@@ -193,12 +193,17 @@ class _NodeVisitorImpl implements _NodeVisitor<StringSink> {
       text,
       output,
       () {
-        out.write(
-          text.value.replaceAllMapped(
+        var content = text.value;
+        if (!(style.containsKey(Attribute.codeBlock.key) ||
+            style.containsKey(Attribute.inlineCode.key) ||
+            (text.parent?.style.containsKey(Attribute.codeBlock.key) ??
+                false))) {
+          content = content.replaceAllMapped(
               RegExp(r'[\\\`\*\_\{\}\[\]\(\)\#\+\-\.\!\>\<]'), (match) {
             return '\\${match[0]}';
-          }),
-        );
+          });
+        }
+        out.write(content);
       },
       sortedAttrsBySpan: true,
     );
