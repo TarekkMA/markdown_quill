@@ -26,15 +26,14 @@ class EmbeddableTableSyntax extends BlockSyntax {
   Node? parse(BlockParser parser) {
     final columnCount = _columnCount(parser.next!);
     final headCells = _columnCount(parser.current);
+    final valBuf = StringBuffer('${parser.current}\n${parser.next!}');
+    parser.advance();
     if (columnCount != headCells) {
       return null;
     }
-    final valBuf = StringBuffer('${parser.current}\n${parser.next!}');
 
     // advance header and divider of hyphens.
-    parser
-      ..advance()
-      ..advance();
+    parser.advance();
 
     while (!parser.isDone && !BlockSyntax.isAtBlockEnd(parser)) {
       valBuf.write('\n${parser.current}');
@@ -102,6 +101,8 @@ class EmbeddableTable extends BlockEmbed {
       EmbeddableTable(attributes['data']!);
 
   static void toMdSyntax(Embed embed, StringSink out) {
-    out.writeln(embed.value.data);
+    out
+      ..writeln(embed.value.data)
+      ..writeln();
   }
 }

@@ -7,6 +7,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_quill/models/rules/format.dart';
 import 'package:markdown/markdown.dart' as md;
+import 'package:quill_markdown/quill_markdown.dart';
 
 import 'custom_quill_attributes.dart';
 
@@ -271,7 +272,9 @@ class MarkdownToDelta extends Converter<String, Delta>
   }
 
   void _insertNewLineAfterElementIfNeeded(md.Element element) {
-    if (element.tag == 'hr') {
+    // TODO: refactor this to allow embeds to spcify if they require
+    // new line after them
+    if (element.tag == 'hr' || element.tag == EmbeddableTable.tableType) {
       // Always add new line after divider
       _justPreviousBlockExit = true;
       _insertNewLine();

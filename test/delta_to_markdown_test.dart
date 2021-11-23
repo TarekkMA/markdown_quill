@@ -25,13 +25,14 @@ final mdToDelta = MarkdownToDelta(
 );
 
 List<md.Node> parseMarkdown(String markdown, [md.Document? document]) {
-  return (document ?? _mdDocument).parseLines(const LineSplitter().convert(markdown));
+  return (document ?? _mdDocument)
+      .parseLines(const LineSplitter().convert(markdown));
 }
 
 /// checks the if rendered html of both inputs are equal
-void expectEqualMarkdown(String actual, String match) {
-  final actualNodes = parseMarkdown(actual);
-  final matchNodes = parseMarkdown(match);
+void expectEqualMarkdown(String actual, String match, [md.Document? document]) {
+  final actualNodes = parseMarkdown(actual, document);
+  final matchNodes = parseMarkdown(match, document);
   final actualHtml = md.HtmlRenderer().render(actualNodes);
   final matchHtml = md.HtmlRenderer()
       .render(matchNodes)
@@ -40,25 +41,37 @@ void expectEqualMarkdown(String actual, String match) {
   expect(actualHtml, matchHtml);
 }
 
-void deltaToMdCheck(Delta delta, String expected) {
-  final actual = DeltaToMarkdown().convert(delta);
-  expectEqualMarkdown(actual, expected);
+void deltaToMdCheck(
+  Delta delta,
+  String expected, [
+  DeltaToMarkdown? deltaToMd,
+  md.Document? document,
+]) {
+  final actual = (deltaToMd ?? DeltaToMarkdown()).convert(delta);
+  expectEqualMarkdown(actual, expected, document);
 }
 
-void deltaOpsToMdCheck(List<Operation> ops, String expected) {
+void deltaOpsToMdCheck(List<Operation> ops, String expected, [
+  DeltaToMarkdown? deltaToMd,
+  md.Document? document,
+]) {
   final delta = Delta();
   for (final op in ops) {
     delta.push(op);
   }
-  deltaToMdCheck(delta, expected);
+  deltaToMdCheck(delta, expected, deltaToMd, document);
 }
 
 /// convert input markdown to delta and then back
 /// to markdown, then compare the input with the
 /// conversion output.
-void mdToDeltaToMdCheck(String expected) {
-  final delta = mdToDelta.convert(expected);
-  deltaToMdCheck(delta, expected);
+void mdToDeltaToMdCheck(String expected, [
+  MarkdownToDelta? _mdToDelta,
+  DeltaToMarkdown? deltaToMd,
+  md.Document? document,
+]) {
+  final delta = (_mdToDelta ?? mdToDelta).convert(expected);
+  deltaToMdCheck(delta, expected, deltaToMd, document);
 }
 
 void main() {

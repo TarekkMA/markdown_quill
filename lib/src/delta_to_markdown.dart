@@ -10,6 +10,7 @@ import 'package:flutter_quill/models/documents/nodes/line.dart';
 import 'package:flutter_quill/models/documents/nodes/node.dart';
 import 'package:flutter_quill/models/documents/style.dart';
 import 'package:quill_markdown/src/custom_quill_attributes.dart';
+import 'package:quill_markdown/src/utils.dart';
 
 class _AttributeHandler {
   _AttributeHandler({
@@ -53,7 +54,9 @@ class DeltaToMarkdown extends Converter<Delta, String>
 
   @override
   String convert(Delta input) {
-    final quillDocument = Document.fromDelta(input);
+    final newDelta = transform(input);
+
+    final quillDocument = Document.fromDelta(newDelta);
 
     final outBuffer = quillDocument.root.accept(this);
 
