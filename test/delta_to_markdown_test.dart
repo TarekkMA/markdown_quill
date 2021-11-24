@@ -51,7 +51,9 @@ void deltaToMdCheck(
   expectEqualMarkdown(actual, expected, document);
 }
 
-void deltaOpsToMdCheck(List<Operation> ops, String expected, [
+void deltaOpsToMdCheck(
+  List<Operation> ops,
+  String expected, [
   DeltaToMarkdown? deltaToMd,
   md.Document? document,
 ]) {
@@ -65,7 +67,8 @@ void deltaOpsToMdCheck(List<Operation> ops, String expected, [
 /// convert input markdown to delta and then back
 /// to markdown, then compare the input with the
 /// conversion output.
-void mdToDeltaToMdCheck(String expected, [
+void mdToDeltaToMdCheck(
+  String expected, [
   MarkdownToDelta? _mdToDelta,
   DeltaToMarkdown? deltaToMd,
   md.Document? document,

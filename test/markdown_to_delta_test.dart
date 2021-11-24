@@ -163,7 +163,6 @@ Goodbye
     );
   });
 
-
   test('code block with language', () {
     final styles = <Attribute>[
       Attribute.codeBlock,

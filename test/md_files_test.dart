@@ -6,8 +6,7 @@ import 'delta_to_markdown_test.dart';
 
 Future<void> main() async {
   final dir = Directory('./test/md_files');
-  final files =
-      (await dir.list().toList()).whereType<File>().toList();
+  final files = (await dir.list().toList()).whereType<File>().toList();
 
   for (final file in files) {
     final fileName = file.uri.pathSegments.last;
