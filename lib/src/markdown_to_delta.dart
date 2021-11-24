@@ -1,8 +1,7 @@
 import 'dart:collection';
 import 'dart:convert';
-import 'dart:developer';
 
-import 'package:collection/src/iterable_extensions.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:markdown/markdown.dart' as md;
 import 'package:markdown_quill/src/custom_quill_attributes.dart';

@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:markdown/markdown.dart' as md;
@@ -69,9 +68,6 @@ TL;DR:
 # The Breakdown
 Having watched and taken notes on other crowdloans, we have decided to keep it simple. **Perfect communication and transparency is our #1 goal.**
 ''';
-
-    debugPrint('Started');
-
     mdToDeltaToMdCheck(md, mdToDelta, deltaToMd, _mdDocument);
   });
 

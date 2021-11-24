@@ -1,7 +1,7 @@
 import 'dart:convert';
+import 'dart:ui';
 
-import 'package:collection/src/iterable_extensions.dart';
-import 'package:flutter/foundation.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_quill/models/documents/nodes/block.dart';
 import 'package:flutter_quill/models/documents/nodes/line.dart';
@@ -296,7 +296,6 @@ class DeltaToMarkdown extends Converter<Delta, String>
 
 //// AST with visitor
 
-@optionalTypeArgs
 abstract class _NodeVisitor<T> {
   const _NodeVisitor._();
 
