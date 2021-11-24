@@ -18,10 +18,6 @@ jobs:
         with:
           channel: 'stable'
 
-      - uses: stelynx/dart-full-coverage@v1.0.5
-        with:
-          package: markdown_quill
-
       - name: Install Dependencies
         run: flutter pub get
 
@@ -30,6 +26,10 @@ jobs:
 
       - name: Analyze
         run: flutter analyze --fatal-warnings .
+
+      - uses: stelynx/dart-full-coverage@v1.0.5
+        with:
+          package: markdown_quill
 
       - name: Run Tests
         run: flutter test --coverage .
