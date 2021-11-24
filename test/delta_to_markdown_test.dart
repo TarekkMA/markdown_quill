@@ -3,8 +3,8 @@ import 'dart:convert';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:markdown/markdown.dart' as md;
-import 'package:quill_markdown/src/delta_to_markdown.dart';
-import 'package:quill_markdown/src/markdown_to_delta.dart';
+import 'package:markdown_quill/src/delta_to_markdown.dart';
+import 'package:markdown_quill/src/markdown_to_delta.dart';
 
 import 'markdown_to_delta_test.dart';
 

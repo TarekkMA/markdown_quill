@@ -1,16 +1,13 @@
-import 'dart:collection';
 import 'dart:convert';
 
 import 'package:collection/src/iterable_extensions.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_quill/models/documents/nodes/block.dart';
-import 'package:flutter_quill/models/documents/nodes/container.dart';
 import 'package:flutter_quill/models/documents/nodes/line.dart';
 import 'package:flutter_quill/models/documents/nodes/node.dart';
-import 'package:flutter_quill/models/documents/style.dart';
-import 'package:quill_markdown/src/custom_quill_attributes.dart';
-import 'package:quill_markdown/src/utils.dart';
+import 'package:markdown_quill/src/custom_quill_attributes.dart';
+import 'package:markdown_quill/src/utils.dart';
 
 class _AttributeHandler {
   _AttributeHandler({

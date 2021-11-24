@@ -1,5 +1,5 @@
 import 'package:flutter_quill/flutter_quill.dart';
-import 'package:quill_markdown/src/embeddable_table_syntax.dart';
+import 'package:markdown_quill/src/embeddable_table_syntax.dart';
 
 Delta transform(Delta delta) {
   final res = Delta();
