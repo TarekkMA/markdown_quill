@@ -5,8 +5,8 @@ import 'dart:developer';
 import 'package:collection/src/iterable_extensions.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:markdown/markdown.dart' as md;
-import 'package:markdown_quill/quill_markdown.dart';
 import 'package:markdown_quill/src/custom_quill_attributes.dart';
+import 'package:markdown_quill/src/embeddable_table_syntax.dart';
 
 /// Converts markdown [md.Element] to list of [Attribute].
 typedef ElementToAttributeConvertor = List<Attribute> Function(
