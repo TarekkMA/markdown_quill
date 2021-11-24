@@ -8,7 +8,7 @@ on:
     - cron: "0 10 * * *"
 
 jobs:
-  freezed:
+  quill_markdown_check:
     runs-on: ubuntu-latest
 
     steps:
