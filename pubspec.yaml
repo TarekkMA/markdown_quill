@@ -1,6 +1,6 @@
 name: markdown_quill
 description: Convert between quill (delta) format and markdown
-version: 0.0.1
+version: 0.0.1+1
 repository: https://github.com/TarekkMA/markdown_quill
 
 environment:

@@ -3,7 +3,9 @@
 
 ![build workflow](https://github.com/TarekkMA/markdown_quill/actions/workflows/build.yml/badge.svg)
 [![codecov](https://codecov.io/gh/TarekkMA/markdown_quill/branch/master/graph/badge.svg?token=A08O1D2EBY)](https://codecov.io/gh/TarekkMA/markdown_quill)
-\[Please note this package is under development the API might change\].
+[![pub package](https://img.shields.io/pub/v/markdown_quill.svg)](https://pub.dartlang.org/packages/markdown_quill)
+
+:warning: \[Please note this package is under development the API might change\].
 
 Provides converters to convert from markdown to quill (Delta) format and vice versa.
 
