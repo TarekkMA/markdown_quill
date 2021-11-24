@@ -25,7 +25,7 @@ jobs:
         run: flutter format --set-exit-if-changed .
 
       - name: Analyze
-        run: flutter analyze --fatal-warnings .
+        run: flutter analyze --fatal-warnings --no-fatal-infos .
 
       - uses: stelynx/dart-full-coverage@v1.0.5
         with:
