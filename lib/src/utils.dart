@@ -1,6 +1,9 @@
+//ignore_for_file: cast_nullable_to_non_nullable
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:markdown_quill/src/embeddable_table_syntax.dart';
 
+/// Format the passed delta to ensure that there is new line
+/// after embeds
 Delta transform(Delta delta) {
   final res = Delta();
   final ops = delta.toList();
@@ -15,6 +18,7 @@ Delta transform(Delta delta) {
   return res;
 }
 
+/// Appends new line after embeds if needed
 void autoAppendNewlineAfterEmbeddable(
   int i,
   List<Operation> ops,

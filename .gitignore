@@ -1,6 +1,8 @@
 # Created by https://www.toptal.com/developers/gitignore/api/flutter
 # Edit at https://www.toptal.com/developers/gitignore?templates=flutter
 
+test/.test_coverage.dart
+
 .idea/
 *.iml
 

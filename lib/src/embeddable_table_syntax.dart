@@ -2,7 +2,7 @@ import 'package:charcode/charcode.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:markdown/markdown.dart';
 
-/// Parses tables.
+/// Parses markdown table and saves the table markdown content into the element attributes.
 class EmbeddableTableSyntax extends BlockSyntax {
   static const _base = TableSyntax();
 
@@ -12,6 +12,7 @@ class EmbeddableTableSyntax extends BlockSyntax {
   @override
   RegExp get pattern => _base.pattern;
 
+  /// @nodoc
   const EmbeddableTableSyntax();
 
   @override
@@ -45,11 +46,11 @@ class EmbeddableTableSyntax extends BlockSyntax {
   }
 
   int _columnCount(String line) {
-    var startIndex = _walkPastOpeningPipe(line);
+    final startIndex = _walkPastOpeningPipe(line);
 
     var endIndex = line.length - 1;
     while (endIndex > 0) {
-      var ch = line.codeUnitAt(endIndex);
+      final ch = line.codeUnitAt(endIndex);
       if (ch == $pipe) {
         endIndex--;
         break;
@@ -65,10 +66,11 @@ class EmbeddableTableSyntax extends BlockSyntax {
 
   int _walkPastWhitespace(String line, int index) {
     while (index < line.length) {
-      var ch = line.codeUnitAt(index);
+      final ch = line.codeUnitAt(index);
       if (ch != $space && ch != $tab) {
         break;
       }
+      //ignore: parameter_assignments
       index++;
     }
     return index;
@@ -77,7 +79,7 @@ class EmbeddableTableSyntax extends BlockSyntax {
   int _walkPastOpeningPipe(String line) {
     var index = 0;
     while (index < line.length) {
-      var ch = line.codeUnitAt(index);
+      final ch = line.codeUnitAt(index);
       if (ch == $pipe) {
         index++;
         index = _walkPastWhitespace(line, index);
@@ -92,14 +94,20 @@ class EmbeddableTableSyntax extends BlockSyntax {
   }
 }
 
+/// An [Embeddable] table that can used to render a table in quill_editor
 class EmbeddableTable extends BlockEmbed {
+  /// [Embeddable] type
   static const tableType = 'x-embed-table';
 
+  /// @nodoc
   EmbeddableTable(String data) : super(tableType, data);
 
+  /// Create from markdown.
+  //ignore: prefer_constructors_over_static_methods
   static EmbeddableTable fromMdSyntax(Map<String, String> attributes) =>
       EmbeddableTable(attributes['data']!);
 
+  /// Outputs table markdown to output.
   static void toMdSyntax(Embed embed, StringSink out) {
     out
       ..writeln(embed.value.data)

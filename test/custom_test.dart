@@ -49,7 +49,7 @@ void main() {
   });
 
   test('table in middle of text', () {
-    const md ='''
+    const md = '''
 We are extremely excited to finally announce our crowdloan details!
 
 TL;DR:
@@ -83,11 +83,4 @@ java code
 not specified
 ```''');
   });
-}
-
-
-void usage() {
-
-
-  final mdDocument = Document();
 }

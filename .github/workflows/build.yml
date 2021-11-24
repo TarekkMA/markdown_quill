@@ -1,0 +1,44 @@
+name: Build
+
+on:
+  push:
+  pull_request:
+  schedule:
+    # runs the CI everyday at 10AM
+    - cron: "0 10 * * *"
+
+jobs:
+  freezed:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: subosito/flutter-action@v1
+        with:
+          channel: 'stable'
+
+      - uses: stelynx/dart-full-coverage@v1.0.5
+        with:
+          package: markdown_quill
+
+      - name: Install Dependencies
+        run: flutter pub get
+
+      - name: Format
+        run: flutter format --set-exit-if-changed .
+
+      - name: Analyze
+        run: flutter analyze --fatal-warnings .
+
+      - name: Run Tests
+        run: flutter test --coverage .
+
+      - uses: VeryGoodOpenSource/very_good_coverage@v1.2.0
+        with:
+          path: './coverage/lcov.info'
+          min_coverage: 90
+
+      - uses: codecov/codecov-action@v1.0.2
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}

@@ -28,6 +28,7 @@ class _AttributeHandler {
   )? afterContent;
 }
 
+/// Outputs [Embed] element as markdown.
 typedef EmbedToMarkdown = void Function(Embed embed, StringSink out);
 
 extension on Object? {
@@ -194,7 +195,6 @@ class DeltaToMarkdown extends Converter<Delta, String>
   @override
   StringSink visitBlock(Block block, [StringSink? output]) {
     final out = output ??= StringBuffer();
-    final style = block.style;
     _handleAttribute(_blockAttrsHandlers, block, output, () {
       for (final line in block.children) {
         line.accept(this, out);
@@ -255,7 +255,6 @@ class DeltaToMarkdown extends Converter<Delta, String>
     final out = output ??= StringBuffer();
 
     final type = embed.value.type;
-    final dynamic data = embed.value.data;
 
     _embedHandlers[type]!.call(embed, out);
 
