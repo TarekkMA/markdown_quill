@@ -6,6 +6,7 @@ import 'package:flutter_quill/flutter_quill.dart';
 import 'package:markdown/markdown.dart' as md;
 import 'package:markdown_quill/src/custom_quill_attributes.dart';
 import 'package:markdown_quill/src/embeddable_table_syntax.dart';
+import 'package:markdown_quill/src/utils.dart';
 
 /// Converts markdown [md.Element] to list of [Attribute].
 typedef ElementToAttributeConvertor = List<Attribute> Function(
@@ -86,7 +87,7 @@ class MarkdownToDelta extends Converter<String, Delta>
   };
 
   final _elementToEmbed = <String, ElementToEmbeddableConvertor>{
-    'hr': (_) => BlockEmbed.horizontalRule,
+    'hr': (_) => horizontalRule,
     'img': (elAttrs) => BlockEmbed.image(elAttrs['src'] ?? ''),
   };
 
@@ -94,13 +95,12 @@ class MarkdownToDelta extends Converter<String, Delta>
   final _activeInlineAttributes = Queue<List<Attribute>>();
   final _activeBlockAttributes = Queue<List<Attribute>>();
   final _topLevelNodes = <md.Node>[];
-  bool _isInBlockquote = false;
+  bool _isInBlockQuote = false;
   bool _isInCodeblock = false;
   bool _justPreviousBlockExit = false;
   String? _lastTag;
   String? _currentBlockTag;
   int _listItemIndent = -1;
-  int _nestingCounter = 0;
 
   @override
   Delta convert(String input) {
@@ -110,11 +110,10 @@ class MarkdownToDelta extends Converter<String, Delta>
     _topLevelNodes.clear();
     _lastTag = null;
     _currentBlockTag = null;
-    _isInBlockquote = false;
+    _isInBlockQuote = false;
     _isInCodeblock = false;
     _justPreviousBlockExit = false;
     _listItemIndent = -1;
-    _nestingCounter = 0;
 
     final lines = const LineSplitter().convert(input);
     final mdNodes = markdownDocument.parseLines(lines);
@@ -142,7 +141,7 @@ class MarkdownToDelta extends Converter<String, Delta>
   @override
   void visitText(md.Text text) {
     String renderedText;
-    if (_isInBlockquote) {
+    if (_isInBlockQuote) {
       renderedText = text.text;
     } else if (_isInCodeblock) {
       renderedText = text.text.endsWith('\n')
@@ -188,7 +187,7 @@ class MarkdownToDelta extends Converter<String, Delta>
     }
 
     if (tag == 'blockquote') {
-      _isInBlockquote = true;
+      _isInBlockQuote = true;
     }
 
     if (tag == 'pre') {
@@ -219,7 +218,7 @@ class MarkdownToDelta extends Converter<String, Delta>
     _insertNewLineAfterElementIfNeeded(element);
 
     if (tag == 'blockquote') {
-      _isInBlockquote = false;
+      _isInBlockQuote = false;
     }
 
     if (tag == 'pre') {
@@ -249,7 +248,7 @@ class MarkdownToDelta extends Converter<String, Delta>
   }
 
   void _insertNewLineBeforeElementIfNeeded(md.Element element) {
-    if (!_isInBlockquote &&
+    if (!_isInBlockQuote &&
         _lastTag == 'blockquote' &&
         element.tag == 'blockquote') {
       _insertNewLine();
@@ -268,7 +267,7 @@ class MarkdownToDelta extends Converter<String, Delta>
   }
 
   void _insertNewLineAfterElementIfNeeded(md.Element element) {
-    // TODO: refactor this to allow embeds to spcify if they require
+    // TODO: refactor this to allow embeds to specify if they require
     // new line after them
     if (element.tag == 'hr' || element.tag == EmbeddableTable.tableType) {
       // Always add new line after divider

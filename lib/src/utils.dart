@@ -2,6 +2,12 @@
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:markdown_quill/src/embeddable_table_syntax.dart';
 
+/// To allow embedding images/videos in horizontal mode.
+const BlockEmbed horizontalRule = BlockEmbed(horizontalRuleType, 'hr');
+
+/// Necessary for [horizontalRule] BlockEmbed.
+const String horizontalRuleType = 'divider';
+
 /// Format the passed delta to ensure that there is new line
 /// after embeds
 Delta transform(Delta delta) {
