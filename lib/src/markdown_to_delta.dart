@@ -420,6 +420,4 @@ class MarkdownToDelta extends Converter<String, Delta>
     }
     return result;
   }
-
-// bool _isBlockElement(md.Element element) => _blockTags.contains(element.tag);
 }
