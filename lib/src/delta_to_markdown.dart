@@ -1,11 +1,13 @@
+// ignore_for_file: implementation_imports
+
 import 'dart:convert';
 import 'dart:ui';
 
 import 'package:collection/collection.dart';
 import 'package:flutter_quill/flutter_quill.dart';
-import 'package:flutter_quill/models/documents/nodes/block.dart';
-import 'package:flutter_quill/models/documents/nodes/line.dart';
-import 'package:flutter_quill/models/documents/nodes/node.dart';
+import 'package:flutter_quill/src/models/documents/nodes/block.dart';
+import 'package:flutter_quill/src/models/documents/nodes/line.dart';
+import 'package:flutter_quill/src/models/documents/nodes/node.dart';
 import 'package:markdown_quill/src/custom_quill_attributes.dart';
 import 'package:markdown_quill/src/utils.dart';
 
@@ -176,7 +178,7 @@ class DeltaToMarkdown extends Converter<Delta, String>
 
   final Map<String, EmbedToMarkdown> _embedHandlers = {
     BlockEmbed.imageType: (embed, out) => out.write('![](${embed.value.data})'),
-    BlockEmbed.horizontalRuleType: (embed, out) {
+    horizontalRuleType: (embed, out) {
       // adds new line after it
       // make --- separated so it doesn't get rendered as header
       out.writeln('- - -');

@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:markdown/markdown.dart' as md;
 import 'package:markdown_quill/src/delta_to_markdown.dart';
 import 'package:markdown_quill/src/markdown_to_delta.dart';
+import 'package:markdown_quill/src/utils.dart';
 
 import 'markdown_to_delta_test.dart';
 
@@ -94,7 +95,7 @@ void main() {
   test('horizontal line 1', () {
     final ops = [
       Operation.insert('Foo\n'),
-      Operation.insert(BlockEmbed.horizontalRule.toJson()),
+      Operation.insert(horizontalRule.toJson()),
       Operation.insert('\nBar\n'),
     ];
     const expected = 'Foo\n\n---\n\nBar\n';
@@ -359,7 +360,7 @@ Test code text `this is inline code !@#$%^&*()_++.` also this is also `\!\"\#\$\
     test('Works with horizontal line', () {
       final ops = [
         Operation.insert('Foo\n'),
-        Operation.insert(BlockEmbed.horizontalRule.toJson()),
+        Operation.insert(horizontalRule.toJson()),
         Operation.insert('Bar\n'),
       ];
       const expected = 'Foo\n\n---\n\nBar\n';

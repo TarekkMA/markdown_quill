@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:markdown/markdown.dart' as md;
 import 'package:markdown_quill/src/custom_quill_attributes.dart';
 import 'package:markdown_quill/src/markdown_to_delta.dart';
+import 'package:markdown_quill/src/utils.dart';
 
 final _mdDocument = md.Document(
   encodeHtml: false,
@@ -523,7 +524,7 @@ public static void main()
         'Foo\n\n---\n\nBar\n',
         [
           Operation.insert('Foo\n'),
-          Operation.insert(BlockEmbed.horizontalRule.toJson()),
+          Operation.insert(horizontalRule.toJson()),
           Operation.insert('\nBar\n'),
         ],
       );
@@ -554,7 +555,7 @@ public static void main()
         mdToDeltaCheck(
           '*\t*\t*\t',
           [
-            Operation.insert(BlockEmbed.horizontalRule.toJson()),
+            Operation.insert(horizontalRule.toJson()),
             Operation.insert('\n'),
           ],
         );
@@ -572,17 +573,17 @@ ___
   ***
    ***''',
           [
-            Operation.insert(BlockEmbed.horizontalRule.toJson()),
+            Operation.insert(horizontalRule.toJson()),
             Operation.insert('\n'),
-            Operation.insert(BlockEmbed.horizontalRule.toJson()),
+            Operation.insert(horizontalRule.toJson()),
             Operation.insert('\n'),
-            Operation.insert(BlockEmbed.horizontalRule.toJson()),
+            Operation.insert(horizontalRule.toJson()),
             Operation.insert('\n'),
-            Operation.insert(BlockEmbed.horizontalRule.toJson()),
+            Operation.insert(horizontalRule.toJson()),
             Operation.insert('\n'),
-            Operation.insert(BlockEmbed.horizontalRule.toJson()),
+            Operation.insert(horizontalRule.toJson()),
             Operation.insert('\n'),
-            Operation.insert(BlockEmbed.horizontalRule.toJson()),
+            Operation.insert(horizontalRule.toJson()),
             Operation.insert('\n'),
           ],
         );
@@ -627,7 +628,7 @@ Foo
           [
             Operation.insert('foo'),
             Operation.insert('\n', Attribute.ul.toJson()),
-            Operation.insert(BlockEmbed.horizontalRule.toJson()),
+            Operation.insert(horizontalRule.toJson()),
             Operation.insert('\n'),
             Operation.insert('bar'),
             Operation.insert('\n', Attribute.ul.toJson()),
@@ -643,7 +644,7 @@ Foo
           [
             Operation.insert('foo'),
             Operation.insert('\n', Attribute.ul.toJson()),
-            Operation.insert(BlockEmbed.horizontalRule.toJson()),
+            Operation.insert(horizontalRule.toJson()),
             Operation.insert('\n'),
             Operation.insert('bar'),
             Operation.insert('\n', Attribute.ul.toJson()),
@@ -812,11 +813,11 @@ foo
 ## foo
 ****''',
           [
-            Operation.insert(BlockEmbed.horizontalRule.toJson()),
+            Operation.insert(horizontalRule.toJson()),
             Operation.insert('\n'),
             Operation.insert('foo'),
             Operation.insert('\n', Attribute.h2.toJson()),
-            Operation.insert(BlockEmbed.horizontalRule.toJson()),
+            Operation.insert(horizontalRule.toJson()),
             Operation.insert('\n'),
           ],
           convertor,
@@ -829,11 +830,11 @@ foo
 ## foo
 ****''',
           [
-            Operation.insert(BlockEmbed.horizontalRule.toJson()),
+            Operation.insert(horizontalRule.toJson()),
             Operation.insert('\n'),
             Operation.insert('foo'),
             Operation.insert('\n', Attribute.h2.toJson()),
-            Operation.insert(BlockEmbed.horizontalRule.toJson()),
+            Operation.insert(horizontalRule.toJson()),
             Operation.insert('\n'),
           ],
           convertor,
@@ -910,7 +911,7 @@ baz*\t
           [
             Operation.insert('Foo'),
             Operation.insert('\n', Attribute.blockQuote.toJson()),
-            Operation.insert(BlockEmbed.horizontalRule.toJson()),
+            Operation.insert(horizontalRule.toJson()),
             Operation.insert('\n'),
           ],
         );
@@ -923,7 +924,7 @@ baz*\t
           [
             Operation.insert('foo'),
             Operation.insert('\n', Attribute.ul.toJson()),
-            Operation.insert(BlockEmbed.horizontalRule.toJson()),
+            Operation.insert(horizontalRule.toJson()),
             Operation.insert('\n'),
           ],
         );
@@ -1226,7 +1227,7 @@ baz
           [
             Operation.insert('foo'),
             Operation.insert('\n', Attribute.blockQuote.toJson()),
-            Operation.insert(BlockEmbed.horizontalRule.toJson()),
+            Operation.insert(horizontalRule.toJson()),
             Operation.insert('\n'),
           ],
         );
