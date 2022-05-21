@@ -5,7 +5,7 @@
 [![codecov](https://codecov.io/gh/TarekkMA/markdown_quill/branch/master/graph/badge.svg?token=A08O1D2EBY)](https://codecov.io/gh/TarekkMA/markdown_quill)
 [![pub package](https://img.shields.io/pub/v/markdown_quill.svg)](https://pub.dartlang.org/packages/markdown_quill)
 
-:warning: \[Please note this package is under development the API might change\].
+## :heart_eyes_cat: Contributions are always welcomed :heart:
 
 Provides converters to convert from markdown to quill (Delta) format and vice versa.
 
