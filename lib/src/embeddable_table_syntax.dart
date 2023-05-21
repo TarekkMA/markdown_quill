@@ -1,5 +1,5 @@
 import 'package:charcode/charcode.dart';
-import 'package:flutter_quill/flutter_quill.dart';
+import 'package:flutter_quill/flutter_quill.dart' hide Node;
 import 'package:markdown/markdown.dart';
 
 /// Parses markdown table and saves the table markdown content into the element attributes.
@@ -25,8 +25,8 @@ class EmbeddableTableSyntax extends BlockSyntax {
   /// * many body rows of body cells (`<td>` cells)
   @override
   Node? parse(BlockParser parser) {
-    final columnCount = _columnCount(parser.next!);
-    final headCells = _columnCount(parser.current);
+    final columnCount = _columnCount(parser.next!.content);
+    final headCells = _columnCount(parser.current.content);
     final valBuf = StringBuffer('${parser.current}\n${parser.next!}');
     parser.advance();
     if (columnCount != headCells) {
@@ -41,8 +41,7 @@ class EmbeddableTableSyntax extends BlockSyntax {
       parser.advance();
     }
 
-    return Element.empty(EmbeddableTable.tableType)
-      ..attributes['data'] = valBuf.toString();
+    return Element.empty(EmbeddableTable.tableType)..attributes['data'] = valBuf.toString();
   }
 
   int _columnCount(String line) {
