@@ -4,7 +4,8 @@ version: 2.0.0
 repository: https://github.com/TarekkMA/markdown_quill
 
 environment:
-  sdk: ">=3.0.0 <4.0.0"
+  sdk: ">=2.17.0 <4.0.0"
+  flutter: ">=3.10.0 <4.0.0"
 
 dependencies:
   charcode: ^1.3.1
@@ -15,5 +16,5 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  meta: ^1.7.0
-  very_good_analysis: ^2.4.0
+  meta: ^1.9.1
+  very_good_analysis: ^5.0.0
