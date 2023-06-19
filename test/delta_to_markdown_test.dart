@@ -19,9 +19,9 @@ final mdToDelta = MarkdownToDelta(
 
   // some test files contains h4-6
   customElementToBlockAttribute: {
-    'h4': (_) => [HeaderAttribute(level: 4)],
-    'h5': (_) => [HeaderAttribute(level: 5)],
-    'h6': (_) => [HeaderAttribute(level: 6)],
+    'h4': (_) => [const HeaderAttribute(level: 4)],
+    'h5': (_) => [const HeaderAttribute(level: 5)],
+    'h6': (_) => [const HeaderAttribute(level: 6)],
   },
 );
 
@@ -105,10 +105,10 @@ void main() {
 
   group('nested styles', () {
     test('nested styles 1', () {
-      final link = LinkAttribute('http://nested.styles');
-      final bold = Attribute.bold;
-      final italic = Attribute.italic;
-      final striked = Attribute.strikeThrough;
+      const link = LinkAttribute('http://nested.styles');
+      const bold = Attribute.bold;
+      const italic = Attribute.italic;
+      const striked = Attribute.strikeThrough;
 
       final ops = [
         Operation.insert('Ok '),
@@ -420,7 +420,7 @@ Test code text `this is inline code !@#$%^&*()_++.` also this is also `\!\"\#\$\
 
     test('Works with one link', () {
       final ops = [
-        Operation.insert('FooBar', LinkAttribute('http://foo.bar').toJson()),
+        Operation.insert('FooBar', const LinkAttribute('http://foo.bar').toJson()),
         Operation.insert('\n'),
       ];
       const expected = '[FooBar](http://foo.bar)\n';

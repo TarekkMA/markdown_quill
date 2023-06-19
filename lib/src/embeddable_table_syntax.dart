@@ -41,7 +41,8 @@ class EmbeddableTableSyntax extends BlockSyntax {
       parser.advance();
     }
 
-    return Element.empty(EmbeddableTable.tableType)..attributes['data'] = valBuf.toString();
+    return Element.empty(EmbeddableTable.tableType)
+      ..attributes['data'] = valBuf.toString();
   }
 
   int _columnCount(String line) {
