@@ -5,6 +5,7 @@ test/.test_coverage.dart
 
 .idea/
 *.iml
+.DS_Store
 
 ### Flutter ###
 # Flutter/Dart/Pub related

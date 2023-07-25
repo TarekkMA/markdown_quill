@@ -9,7 +9,7 @@ import 'package:markdown_quill/src/embeddable_table_syntax.dart';
 import 'package:markdown_quill/src/utils.dart';
 
 /// Converts markdown [md.Element] to list of [Attribute].
-typedef ElementToAttributeConvertor = List<Attribute> Function(
+typedef ElementToAttributeConvertor = List<Attribute<dynamic>> Function(
   md.Element element,
 );
 
@@ -92,8 +92,8 @@ class MarkdownToDelta extends Converter<String, Delta>
   };
 
   var _delta = Delta();
-  final _activeInlineAttributes = Queue<List<Attribute>>();
-  final _activeBlockAttributes = Queue<List<Attribute>>();
+  final _activeInlineAttributes = Queue<List<Attribute<dynamic>>>();
+  final _activeBlockAttributes = Queue<List<Attribute<dynamic>>>();
   final _topLevelNodes = <md.Node>[];
   bool _isInBlockQuote = false;
   bool _isInCodeblock = false;
@@ -302,7 +302,7 @@ class MarkdownToDelta extends Converter<String, Delta>
 
   Map<String, dynamic>? _effectiveBlockAttrs() {
     if (_activeBlockAttributes.isEmpty) return null;
-    final attrsRespectingExclusivity = <Attribute>[
+    final attrsRespectingExclusivity = <Attribute<dynamic>>[
       if (_listItemIndent > 0) IndentAttribute(level: _listItemIndent),
     ];
 
@@ -370,8 +370,8 @@ class MarkdownToDelta extends Converter<String, Delta>
     return _effectiveElementToInlineAttr().containsKey(element.tag);
   }
 
-  List<Attribute> _toInlineAttributes(md.Element element) {
-    List<Attribute>? result;
+  List<Attribute<dynamic>> _toInlineAttributes(md.Element element) {
+    List<Attribute<dynamic>>? result;
     if (!(_isInCodeblock && element.tag == 'code')) {
       result = _effectiveElementToInlineAttr()[element.tag]?.call(element);
     }
@@ -393,7 +393,7 @@ class MarkdownToDelta extends Converter<String, Delta>
     return _effectiveElementToBlockAttr().containsKey(element.tag);
   }
 
-  List<Attribute> _toBlockAttributes(md.Element element) {
+  List<Attribute<dynamic>> _toBlockAttributes(md.Element element) {
     final result = _effectiveElementToBlockAttr()[element.tag]?.call(element);
     if (result == null) {
       throw Exception(
