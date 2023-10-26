@@ -1,6 +1,6 @@
 ## [next]
 
-* Update flutter_quill to 7.10.2
+* Update flutter_quill to 8.0.0
 * Migrate `Text` type to `QuillText` type
 * Fix various lint issues
 
