@@ -338,24 +338,24 @@ class MarkdownToDelta extends Converter<String, Delta>
     var result = text;
     // The leading spaces pattern is used to identify spaces
     // at the beginning of a line of text.
-    final _leadingSpacesPattern = RegExp('^ *');
+    final kleadingSpacesPattern = RegExp('^ *');
 
     // The soft line break is used to identify the spaces at the end of a line
     // of text and the leading spaces in the immediately following the line
     // of text. These spaces are removed in accordance with the Markdown
     // specification on soft line breaks when lines of text are joined.
-    final _softLineBreak = RegExp(r' ?\n *');
+    final ksoftLineBreak = RegExp(r' ?\n *');
 
     // Leading spaces following a hard line break are ignored.
     // https://github.github.com/gfm/#example-657
     if (const ['p', 'ol', 'li', 'br'].contains(_lastTag)) {
-      result = result.replaceAll(_leadingSpacesPattern, '');
+      result = result.replaceAll(kleadingSpacesPattern, '');
     }
 
     if (softLineBreak) {
       return result;
     }
-    return result.replaceAll(_softLineBreak, ' ');
+    return result.replaceAll(ksoftLineBreak, ' ');
   }
 
   Map<String, ElementToAttributeConvertor> _effectiveElementToInlineAttr() {

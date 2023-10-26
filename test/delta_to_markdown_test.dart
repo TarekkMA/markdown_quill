@@ -14,7 +14,7 @@ final _mdDocument = md.Document(
   extensionSet: md.ExtensionSet.gitHubFlavored,
 );
 
-final mdToDelta = MarkdownToDelta(
+final kmdToDelta = MarkdownToDelta(
   markdownDocument: _mdDocument,
 
   // some test files contains h4-6
@@ -70,11 +70,11 @@ void deltaOpsToMdCheck(
 /// conversion output.
 void mdToDeltaToMdCheck(
   String expected, [
-  MarkdownToDelta? _mdToDelta,
+  MarkdownToDelta? mdToDelta,
   DeltaToMarkdown? deltaToMd,
   md.Document? document,
 ]) {
-  final delta = (_mdToDelta ?? mdToDelta).convert(expected);
+  final delta = (mdToDelta ?? kmdToDelta).convert(expected);
   deltaToMdCheck(delta, expected, deltaToMd, document);
 }
 
@@ -420,7 +420,8 @@ Test code text `this is inline code !@#$%^&*()_++.` also this is also `\!\"\#\$\
 
     test('Works with one link', () {
       final ops = [
-        Operation.insert('FooBar', const LinkAttribute('http://foo.bar').toJson()),
+        Operation.insert(
+            'FooBar', const LinkAttribute('http://foo.bar').toJson()),
         Operation.insert('\n'),
       ];
       const expected = '[FooBar](http://foo.bar)\n';
