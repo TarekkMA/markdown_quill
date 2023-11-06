@@ -212,7 +212,7 @@ class DeltaToMarkdown extends Converter<Delta, String>
       }
     });
     if (style.isEmpty ||
-        style.values.every((item) => item.scope != AttributeScope.BLOCK)) {
+        style.values.every((item) => item.scope != AttributeScope.block)) {
       out.writeln();
     }
     if (style.containsKey(Attribute.list.key) &&
