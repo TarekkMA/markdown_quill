@@ -420,7 +420,8 @@ Test code text `this is inline code !@#$%^&*()_++.` also this is also `\!\"\#\$\
 
     test('Works with one link', () {
       final ops = [
-        Operation.insert('FooBar', const LinkAttribute('http://foo.bar').toJson()),
+        Operation.insert(
+            'FooBar', const LinkAttribute('http://foo.bar').toJson()),
         Operation.insert('\n'),
       ];
       const expected = '[FooBar](http://foo.bar)\n';

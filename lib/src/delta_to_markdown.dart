@@ -212,7 +212,7 @@ class DeltaToMarkdown extends Converter<Delta, String>
       }
     });
     if (style.isEmpty ||
-        style.values.every((item) => item.scope != AttributeScope.BLOCK)) {
+        style.values.every((item) => item.scope != AttributeScope.block)) {
       out.writeln();
     }
     if (style.containsKey(Attribute.list.key) &&
@@ -224,7 +224,7 @@ class DeltaToMarkdown extends Converter<Delta, String>
   }
 
   @override
-  StringSink visitText(Text text, [StringSink? output]) {
+  StringSink visitText(QuillText text, [StringSink? output]) {
     final out = output ??= StringBuffer();
     final style = text.style;
     _handleAttribute(
@@ -303,7 +303,7 @@ abstract class _NodeVisitor<T> {
 
   T visitLine(Line line, [T? context]);
 
-  T visitText(Text text, [T? context]);
+  T visitText(QuillText text, [T? context]);
 
   T visitEmbed(Embed embed, [T? context]);
 }
@@ -317,8 +317,8 @@ extension _NodeX on Node {
         return visitor.visitBlock(this as Block, context);
       case Line:
         return visitor.visitLine(this as Line, context);
-      case Text:
-        return visitor.visitText(this as Text, context);
+      case QuillText:
+        return visitor.visitText(this as QuillText, context);
       case Embed:
         return visitor.visitEmbed(this as Embed, context);
     }

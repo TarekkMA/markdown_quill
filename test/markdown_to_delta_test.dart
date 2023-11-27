@@ -416,7 +416,8 @@ public static void main()
       mdToDeltaCheck(
         '[FooBar](http://foo.bar)\n',
         [
-          Operation.insert('FooBar', const LinkAttribute('http://foo.bar').toJson()),
+          Operation.insert(
+              'FooBar', const LinkAttribute('http://foo.bar').toJson()),
           Operation.insert('\n'),
         ],
       );
@@ -1444,11 +1445,11 @@ The number of windows in my house is
             Operation.insert('foo'),
             Operation.insert('\n', Attribute.ul.toJson()),
             Operation.insert('bar'),
-            Operation.insert(
-                '\n', attrsToJson([Attribute.ul, const IndentAttribute(level: 1)])),
+            Operation.insert('\n',
+                attrsToJson([Attribute.ul, const IndentAttribute(level: 1)])),
             Operation.insert('baz'),
-            Operation.insert(
-                '\n', attrsToJson([Attribute.ul, const IndentAttribute(level: 2)])),
+            Operation.insert('\n',
+                attrsToJson([Attribute.ul, const IndentAttribute(level: 2)])),
           ],
         );
       });
@@ -1478,11 +1479,11 @@ The number of windows in my house is
             Operation.insert('d'),
             Operation.insert('\n', Attribute.ul.toJson()),
             Operation.insert('e'),
-            Operation.insert(
-                '\n', attrsToJson([Attribute.ul, const IndentAttribute(level: 1)])),
+            Operation.insert('\n',
+                attrsToJson([Attribute.ul, const IndentAttribute(level: 1)])),
             Operation.insert('f'),
-            Operation.insert(
-                '\n', attrsToJson([Attribute.ul, const IndentAttribute(level: 1)])),
+            Operation.insert('\n',
+                attrsToJson([Attribute.ul, const IndentAttribute(level: 1)])),
           ],
         );
       });
