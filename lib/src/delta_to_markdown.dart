@@ -5,6 +5,7 @@ import 'dart:ui';
 
 import 'package:collection/collection.dart';
 import 'package:flutter_quill/flutter_quill.dart';
+import 'package:flutter_quill/quill_delta.dart';
 import 'package:markdown_quill/src/custom_quill_attributes.dart';
 import 'package:markdown_quill/src/utils.dart';
 
@@ -212,7 +213,7 @@ class DeltaToMarkdown extends Converter<Delta, String>
       }
     });
     if (style.isEmpty ||
-        style.values.every((item) => item.scope != AttributeScope.BLOCK)) {
+        style.values.every((item) => item.scope != AttributeScope.block)) {
       out.writeln();
     }
     if (style.containsKey(Attribute.list.key) &&
