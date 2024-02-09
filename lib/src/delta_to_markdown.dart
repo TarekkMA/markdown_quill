@@ -5,6 +5,7 @@ import 'dart:ui';
 
 import 'package:collection/collection.dart';
 import 'package:flutter_quill/flutter_quill.dart';
+import 'package:flutter_quill/quill_delta.dart';
 import 'package:markdown_quill/src/custom_quill_attributes.dart';
 import 'package:markdown_quill/src/utils.dart';
 
@@ -38,8 +39,7 @@ extension on Object? {
 }
 
 /// Convertor from [Delta] to quill Markdown string.
-class DeltaToMarkdown extends Converter<Delta, String>
-    implements _NodeVisitor<StringSink> {
+class DeltaToMarkdown extends Converter<Delta, String> implements _NodeVisitor<StringSink> {
   ///
   DeltaToMarkdown({
     Map<String, EmbedToMarkdown>? customEmbedHandlers,
@@ -71,8 +71,9 @@ class DeltaToMarkdown extends Converter<Delta, String>
           );
         }
         if (infoString.isEmpty) {
-          final linesWithLang = (node as Block).children.where((child) =>
-              child.containsAttr(CodeBlockLanguageAttribute.attrKey));
+          final linesWithLang = (node as Block)
+              .children
+              .where((child) => child.containsAttr(CodeBlockLanguageAttribute.attrKey));
           if (linesWithLang.isNotEmpty) {
             infoString = linesWithLang.first.getAttrValueOr(
               CodeBlockLanguageAttribute.attrKey,
@@ -160,8 +161,7 @@ class DeltaToMarkdown extends Converter<Delta, String>
     ),
     Attribute.link.key: _AttributeHandler(
       beforeContent: (attribute, node, output) {
-        if (node.previous?.containsAttr(attribute.key, attribute.value) !=
-            true) {
+        if (node.previous?.containsAttr(attribute.key, attribute.value) != true) {
           output.write('[');
         }
       },
@@ -211,8 +211,7 @@ class DeltaToMarkdown extends Converter<Delta, String>
         leaf.accept(this, out);
       }
     });
-    if (style.isEmpty ||
-        style.values.every((item) => item.scope != AttributeScope.BLOCK)) {
+    if (style.isEmpty || style.values.every((item) => item.scope != AttributeScope.block)) {
       out.writeln();
     }
     if (style.containsKey(Attribute.list.key) &&
@@ -224,7 +223,7 @@ class DeltaToMarkdown extends Converter<Delta, String>
   }
 
   @override
-  StringSink visitText(Text text, [StringSink? output]) {
+  StringSink visitText(QuillText text, [StringSink? output]) {
     final out = output ??= StringBuffer();
     final style = text.style;
     _handleAttribute(
@@ -235,10 +234,9 @@ class DeltaToMarkdown extends Converter<Delta, String>
         var content = text.value;
         if (!(style.containsKey(Attribute.codeBlock.key) ||
             style.containsKey(Attribute.inlineCode.key) ||
-            (text.parent?.style.containsKey(Attribute.codeBlock.key) ??
-                false))) {
-          content = content.replaceAllMapped(
-              RegExp(r'[\\\`\*\_\{\}\[\]\(\)\#\+\-\.\!\>\<]'), (match) {
+            (text.parent?.style.containsKey(Attribute.codeBlock.key) ?? false))) {
+          content =
+              content.replaceAllMapped(RegExp(r'[\\\`\*\_\{\}\[\]\(\)\#\+\-\.\!\>\<]'), (match) {
             return '\\${match[0]}';
           });
         }
@@ -267,9 +265,8 @@ class DeltaToMarkdown extends Converter<Delta, String>
     VoidCallback contentHandler, {
     bool sortedAttrsBySpan = false,
   }) {
-    final attrs = sortedAttrsBySpan
-        ? node.attrsSortedByLongestSpan()
-        : node.style.attributes.values.toList();
+    final attrs =
+        sortedAttrsBySpan ? node.attrsSortedByLongestSpan() : node.style.attributes.values.toList();
     final handlersToUse = attrs
         .where((attr) => handlers.containsKey(attr.key))
         .map((attr) => MapEntry(attr.key, handlers[attr.key]!))
@@ -303,7 +300,7 @@ abstract class _NodeVisitor<T> {
 
   T visitLine(Line line, [T? context]);
 
-  T visitText(Text text, [T? context]);
+  T visitText(QuillText text, [T? context]);
 
   T visitEmbed(Embed embed, [T? context]);
 }
@@ -317,8 +314,8 @@ extension _NodeX on Node {
         return visitor.visitBlock(this as Block, context);
       case Line:
         return visitor.visitLine(this as Line, context);
-      case Text:
-        return visitor.visitText(this as Text, context);
+      case QuillText:
+        return visitor.visitText(this as QuillText, context);
       case Embed:
         return visitor.visitEmbed(this as Embed, context);
     }
@@ -356,8 +353,8 @@ extension _NodeX on Node {
       node = node.next;
     }
 
-    final attrs = style.attributes.values.sorted(
-        (attr1, attr2) => attrCount[attr2]!.compareTo(attrCount[attr1]!));
+    final attrs = style.attributes.values
+        .sorted((attr1, attr2) => attrCount[attr2]!.compareTo(attrCount[attr1]!));
 
     return attrs;
   }
