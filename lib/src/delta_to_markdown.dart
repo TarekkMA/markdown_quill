@@ -103,9 +103,22 @@ class DeltaToMarkdown extends Converter<Delta, String>
       beforeContent: (attribute, node, output) {
         final indentLevel = node.getAttrValueOr(Attribute.indent.key, 0);
         final isNumbered = attribute.value == 'ordered';
+        final isChecked = attribute.value == 'checked';
+        final isUnchecked = attribute.value == 'unchecked';
+        final indent = (isNumbered ? '   ' : '  ') * indentLevel;
+        final String prefix;
+        if (isNumbered) {
+          prefix = '1. ';
+        } else if (isChecked) {
+          prefix = '- [x] ';
+        } else if (isUnchecked) {
+          prefix = '- [ ] ';
+        } else {
+          prefix = '- ';
+        }
         output
-          ..write((isNumbered ? '   ' : '  ') * indentLevel)
-          ..write('${isNumbered ? '1.' : '-'} ');
+          ..write(indent)
+          ..write(prefix);
       },
     ),
   };
@@ -312,13 +325,13 @@ abstract class _NodeVisitor<T> {
 extension _NodeX on Node {
   T accept<T>(_NodeVisitor<T> visitor, [T? context]) {
     switch (runtimeType) {
-      case Root:
+      case const (Root):
         return visitor.visitRoot(this as Root, context);
-      case Block:
+      case const (Block):
         return visitor.visitBlock(this as Block, context);
-      case Line:
+      case const (Line):
         return visitor.visitLine(this as Line, context);
-      case QuillText:
+      case const (QuillText):
         return visitor.visitText(this as QuillText, context);
       case Embed:
         return visitor.visitEmbed(this as Embed, context);

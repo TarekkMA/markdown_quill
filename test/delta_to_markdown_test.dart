@@ -449,4 +449,21 @@ Test code text `this is inline code !@#$%^&*()_++.` also this is also `\!\"\#\$\
       deltaOpsToMdCheck(ops, expected);
     });
   });
+
+  group('check list', () {
+    test('test 1', () {
+      final ops = [
+        Operation.insert('Dads'),
+        Operation.insert('\n', [Attribute.unchecked].toJson()),
+        Operation.insert('1212'),
+        Operation.insert('\n', [Attribute.checked].toJson()),
+      ];
+      const expected = '''
+- [ ] Dads
+- [x] 1212 
+    ''';
+
+      deltaOpsToMdCheck(ops, expected);
+    });
+  });
 }

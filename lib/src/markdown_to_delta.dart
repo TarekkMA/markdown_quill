@@ -60,6 +60,16 @@ class MarkdownToDelta extends Converter<String, Delta>
   final _elementToBlockAttr = <String, ElementToAttributeConvertor>{
     'ul': (_) => [Attribute.ul],
     'ol': (_) => [Attribute.ol],
+    'li': (element) {
+      if (element.attributes['class'] != 'task-list-item') return [];
+      final input = element.children!.first as md.Element;
+      return [
+        if (input.attributes['checked'] == 'true')
+          Attribute.checked
+        else
+          Attribute.unchecked
+      ];
+    },
     'pre': (element) {
       final codeChild = element.children!.first as md.Element;
       final language = (codeChild.attributes['class'] ?? '')
@@ -181,10 +191,10 @@ class MarkdownToDelta extends Converter<String, Delta>
     _lastTag = tag;
 
     if (_haveBlockAttrs(element)) {
-      _activeBlockAttributes.addLast(_toBlockAttributes(element));
+      _addBlockAttrs(_toBlockAttributes(element));
     }
     if (_haveInlineAttrs(element)) {
-      _activeInlineAttributes.addLast(_toInlineAttributes(element));
+      _addInlineAttrs(_toInlineAttributes(element));
     }
 
     if (tag == 'blockquote') {
@@ -314,8 +324,14 @@ class MarkdownToDelta extends Converter<String, Delta>
       final isThereAlreadyExclusiveAttr = attrsRespectingExclusivity.any(
         (element) => Attribute.exclusiveBlockKeys.contains(element.key),
       );
+      final canOverrideExclusivity = attrsRespectingExclusivity
+              .map((e) => e.key)
+              .contains(Attribute.list.key) &&
+          attr.key == Attribute.list.key;
 
-      if (!(isExclusiveAttr && isThereAlreadyExclusiveAttr)) {
+      if (!isExclusiveAttr ||
+          !isThereAlreadyExclusiveAttr ||
+          canOverrideExclusivity) {
         attrsRespectingExclusivity.add(attr);
       }
     }
@@ -368,7 +384,9 @@ class MarkdownToDelta extends Converter<String, Delta>
 
   bool _haveInlineAttrs(md.Element element) {
     if (_isInCodeblock && element.tag == 'code') return false;
-    return _effectiveElementToInlineAttr().containsKey(element.tag);
+    final exists = _effectiveElementToInlineAttr().containsKey(element.tag);
+    if (!exists) return false;
+    return _effectiveElementToInlineAttr()[element.tag]!(element).isNotEmpty;
   }
 
   List<Attribute<dynamic>> _toInlineAttributes(md.Element element) {
@@ -390,8 +408,18 @@ class MarkdownToDelta extends Converter<String, Delta>
     };
   }
 
+  void _addInlineAttrs(List<Attribute<dynamic>> attrs) {
+    _activeInlineAttributes.addLast(attrs);
+  }
+
+  void _addBlockAttrs(List<Attribute<dynamic>> attrs) {
+    _activeBlockAttributes.addLast(attrs);
+  }
+
   bool _haveBlockAttrs(md.Element element) {
-    return _effectiveElementToBlockAttr().containsKey(element.tag);
+    final exists = _effectiveElementToBlockAttr().containsKey(element.tag);
+    if (!exists) return false;
+    return _effectiveElementToBlockAttr()[element.tag]!(element).isNotEmpty;
   }
 
   List<Attribute<dynamic>> _toBlockAttributes(md.Element element) {
