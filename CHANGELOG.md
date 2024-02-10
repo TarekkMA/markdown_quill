@@ -10,3 +10,8 @@
 
 * Support Flutter 3.0
 * Update to flutter_quill: 5.0
+
+
+## 3.0.0
+
+* Update to flutter_quill: 9.2.12
