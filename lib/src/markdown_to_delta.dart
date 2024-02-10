@@ -324,11 +324,14 @@ class MarkdownToDelta extends Converter<String, Delta>
       final isThereAlreadyExclusiveAttr = attrsRespectingExclusivity.any(
         (element) => Attribute.exclusiveBlockKeys.contains(element.key),
       );
-      final canOverrideExclusivity =
-          attrsRespectingExclusivity.map((e) => e.key).contains(Attribute.list.key) &&
-              attr.key == Attribute.list.key;
+      final canOverrideExclusivity = attrsRespectingExclusivity
+              .map((e) => e.key)
+              .contains(Attribute.list.key) &&
+          attr.key == Attribute.list.key;
 
-      if (!isExclusiveAttr || !isThereAlreadyExclusiveAttr || canOverrideExclusivity) {
+      if (!isExclusiveAttr ||
+          !isThereAlreadyExclusiveAttr ||
+          canOverrideExclusivity) {
         attrsRespectingExclusivity.add(attr);
       }
     }

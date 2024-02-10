@@ -1,17 +1,23 @@
-## 0.0.1
+## 3.1.0
 
-* Initial release.
+* Add support for task list
 
-## 0.0.2
+## 3.0.0
 
-* Update dependencies.
+* Update to flutter_quill: 9.2.12
 
 ## 1.0.0
 
 * Support Flutter 3.0
 * Update to flutter_quill: 5.0
 
+## 0.0.2
 
-## 3.0.0
+* Update dependencies.
 
-* Update to flutter_quill: 9.2.12
+## 0.0.1
+
+* Initial release.
+
+
+
