@@ -7,5 +7,5 @@ class CodeBlockLanguageAttribute extends Attribute<String?> {
 
   /// @nodoc
   CodeBlockLanguageAttribute(String? value)
-      : super(attrKey, AttributeScope.IGNORE, value);
+      : super(attrKey, AttributeScope.ignore, value);
 }
