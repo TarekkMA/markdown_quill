@@ -29,6 +29,12 @@ List<Operation> fromOps(List<Operation> ops) {
   return delta.toList();
 }
 
+extension AttributeListExt on List<Attribute<dynamic>> {
+  Map<String, dynamic> toJson() {
+    return attrsToJson(this);
+  }
+}
+
 Map<String, dynamic> attrsToJson(List<Attribute<dynamic>> attrs) {
   return <String, dynamic>{
     for (final attr in attrs) ...attr.toJson(),
@@ -1488,6 +1494,20 @@ The number of windows in my house is
           ],
         );
       });
+    });
+  });
+
+  group('check list', () {
+    test('test 1', () {
+      mdToDeltaCheck('''
+- [ ] Dads
+- [x] 1212 
+    ''', [
+        Operation.insert('Dads'),
+        Operation.insert('\n', [Attribute.unchecked].toJson()),
+        Operation.insert('1212'),
+        Operation.insert('\n', [Attribute.checked].toJson()),
+      ]);
     });
   });
 }
