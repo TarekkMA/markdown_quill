@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter_quill/flutter_quill.dart';
+import 'package:flutter_quill/quill_delta.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:markdown/markdown.dart' as md;
 import 'package:markdown_quill/src/delta_to_markdown.dart';
@@ -420,7 +421,8 @@ Test code text `this is inline code !@#$%^&*()_++.` also this is also `\!\"\#\$\
 
     test('Works with one link', () {
       final ops = [
-        Operation.insert('FooBar', const LinkAttribute('http://foo.bar').toJson()),
+        Operation.insert(
+            'FooBar', const LinkAttribute('http://foo.bar').toJson()),
         Operation.insert('\n'),
       ];
       const expected = '[FooBar](http://foo.bar)\n';

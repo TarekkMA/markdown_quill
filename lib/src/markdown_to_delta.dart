@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:collection/collection.dart';
 import 'package:flutter_quill/flutter_quill.dart';
+import 'package:flutter_quill/quill_delta.dart';
 import 'package:markdown/markdown.dart' as md;
 import 'package:markdown_quill/src/custom_quill_attributes.dart';
 import 'package:markdown_quill/src/embeddable_table_syntax.dart';
