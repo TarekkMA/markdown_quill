@@ -93,6 +93,7 @@ class MarkdownToDelta extends Converter<String, Delta>
     'em': (_) => [Attribute.italic],
     'strong': (_) => [Attribute.bold],
     'del': (_) => [Attribute.strikeThrough],
+    'ins': (_) => [Attribute.underline],
     'a': (element) => [LinkAttribute(element.attributes['href'])],
     'code': (_) => [Attribute.inlineCode],
   };

@@ -6,6 +6,6 @@ class CodeBlockLanguageAttribute extends Attribute<String?> {
   static const attrKey = 'x-md-codeblock-lang';
 
   /// @nodoc
-  CodeBlockLanguageAttribute(String? value)
+  const CodeBlockLanguageAttribute(String? value)
       : super(attrKey, AttributeScope.ignore, value);
 }

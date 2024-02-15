@@ -466,4 +466,16 @@ Test code text `this is inline code !@#$%^&*()_++.` also this is also `\!\"\#\$\
       deltaOpsToMdCheck(ops, expected);
     });
   });
+
+  group('underline', () {
+    test('test 1', () {
+      final ops = [
+        Operation.insert('Underline test', [Attribute.underline].toJson()),
+        Operation.insert('\n', [Attribute.underline].toJson()),
+      ];
+      const expected = '''<ins>Underline test</ins>''';
+
+      deltaOpsToMdCheck(ops, expected);
+    });
+  });
 }

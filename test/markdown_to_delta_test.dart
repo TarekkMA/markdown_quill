@@ -4,11 +4,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:markdown/markdown.dart' as md;
 import 'package:markdown_quill/src/custom_quill_attributes.dart';
 import 'package:markdown_quill/src/markdown_to_delta.dart';
+import 'package:markdown_quill/src/underline_syntax.dart';
 import 'package:markdown_quill/src/utils.dart';
 
 final _mdDocument = md.Document(
   encodeHtml: false,
-  extensionSet: md.ExtensionSet.gitHubFlavored,
+  extensionSet: md.ExtensionSet.gitHubWeb,
 );
 
 void mdToDeltaCheck(
@@ -1508,6 +1509,26 @@ The number of windows in my house is
         Operation.insert('1212'),
         Operation.insert('\n', [Attribute.checked].toJson()),
       ]);
+    });
+  });
+
+  group('underline', () {
+    test('test 1', () {
+      const markdown = '''
+<ins>Underline test</ins>
+''';
+
+      final expected = [
+        Operation.insert('Underline test\n', [Attribute.underline].toJson()),
+      ];
+
+      mdToDeltaCheck(markdown, expected, MarkdownToDelta(markdownDocument: md.Document(
+        encodeHtml: false,
+        extensionSet: md.ExtensionSet.gitHubWeb,
+        inlineSyntaxes: [
+          UnderlineSyntax(),
+        ],
+      )));
     });
   });
 }
