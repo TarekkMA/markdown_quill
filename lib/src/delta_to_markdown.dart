@@ -115,10 +115,11 @@ class DeltaToMarkdown extends Converter<Delta, String>
         final isNumbered = attribute.value == 'ordered';
         final isChecked = attribute.value == 'checked';
         final isUnchecked = attribute.value == 'unchecked';
-        final indent = (isNumbered ? '   ' : '  ') * indentLevel;
+
+        final indent = '    ' * indentLevel;
         final String prefix;
         if (isNumbered) {
-          prefix = '1. ';
+          prefix = '${_prefixNumber(node, indentLevel)} ';
         } else if (isChecked) {
           prefix = '- [x] ';
         } else if (isUnchecked) {
@@ -408,4 +409,63 @@ class CustomAttributeHandler {
     Node node,
     StringSink output,
   )? afterContent;
+}
+
+String _prefixNumber(Node node, int indentLevel) {
+  var itemsBeforeAtMyIndentLevel = 0;
+
+  final root = _findRoot(node);
+  if (root == null) {
+    return '1.';
+  }
+  final document = _toDocumentList(root);
+  final nodeIndex = document.indexOf(node);
+
+  for (var i = nodeIndex - 1; i >= 0; i--) {
+    final nodeBefore = document[i];
+
+    final nodeBeforeIndentLevel =
+        nodeBefore.getAttrValueOr(Attribute.indent.key, 0);
+    final nodeBeforeListType =
+        nodeBefore.getAttrValueOr<String?>(Attribute.list.key, null);
+    final isOrdered = nodeBeforeListType == 'ordered';
+
+    if (nodeBeforeListType == null) {
+      break;
+    }
+    if (nodeBeforeIndentLevel < indentLevel) {
+      break;
+    }
+    if (nodeBeforeIndentLevel == indentLevel && isOrdered) {
+      itemsBeforeAtMyIndentLevel++;
+    }
+  }
+
+  return '${itemsBeforeAtMyIndentLevel + 1}.';
+}
+
+List<Node> _toDocumentList(Node node, {List<Node>? input}) {
+  final output = input ?? <Node>[];
+  List<Node>? children;
+  if (node is Root) {
+    children = node.children.toList();
+  } else if (node is Block) {
+    children = node.children.toList();
+  }
+
+  if (children == null || children.isEmpty) {
+    output.add(node);
+  } else {
+    for (final child in children) {
+      _toDocumentList(child, input: output);
+    }
+  }
+  return output;
+}
+
+Root? _findRoot(Node? parent) {
+  if (parent is Root || parent == null) {
+    return parent as Root?;
+  }
+  return _findRoot(parent.parent);
 }
