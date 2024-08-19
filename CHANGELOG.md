@@ -1,5 +1,7 @@
 ## 4.0.0
 
+
+Thanks to [Łukasz Wiśniewski](https://github.com/vishna) for his valuable contribution.
 * Upgrade to flutter_quill: 10.x.x
 * Added an option to keep empty lines
 * fix ordered list prefix
