@@ -1,3 +1,10 @@
+## 4.0.0
+
+* Upgrade to flutter_quill: 10.x.x
+* Added an option to keep empty lines
+* fix ordered list prefix
+* Allow users to define custom textAttrsHandlers 
+
 ## 3.1.0
 
 * Add support for task list
