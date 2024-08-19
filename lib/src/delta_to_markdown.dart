@@ -38,6 +38,10 @@ extension on Object? {
   }
 }
 
+///
+typedef DeltaToMarkdownVisitLineHandleNewLine = void Function(
+    Style style, StringSink out);
+
 /// Convertor from [Delta] to quill Markdown string.
 class DeltaToMarkdown extends Converter<Delta, String>
     implements _NodeVisitor<StringSink> {
@@ -45,6 +49,7 @@ class DeltaToMarkdown extends Converter<Delta, String>
   DeltaToMarkdown({
     Map<String, EmbedToMarkdown>? customEmbedHandlers,
     Map<String, CustomAttributeHandler>? customTextAttrsHandlers,
+    this.visitLineHandleNewLine,
   }) {
     if (customEmbedHandlers != null) {
       _embedHandlers.addAll(customEmbedHandlers);
@@ -59,6 +64,9 @@ class DeltaToMarkdown extends Converter<Delta, String>
       }
     }
   }
+
+  /// allows custom handling of adding new lines to quill Markdown string
+  final DeltaToMarkdownVisitLineHandleNewLine? visitLineHandleNewLine;
 
   @override
   String convert(Delta input) {
@@ -235,6 +243,10 @@ class DeltaToMarkdown extends Converter<Delta, String>
         leaf.accept(this, out);
       }
     });
+    if (visitLineHandleNewLine != null) {
+      visitLineHandleNewLine?.call(style, out);
+      return out;
+    }
     if (style.isEmpty ||
         style.values.every((item) => item.scope != AttributeScope.block)) {
       out.writeln();
