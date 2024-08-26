@@ -42,6 +42,9 @@ extension on Object? {
 typedef DeltaToMarkdownVisitLineHandleNewLine = void Function(
     Style style, StringSink out);
 
+///
+typedef CustomContentHandler = void Function(QuillText text, StringSink out);
+
 /// Convertor from [Delta] to quill Markdown string.
 class DeltaToMarkdown extends Converter<Delta, String>
     implements _NodeVisitor<StringSink> {
@@ -50,6 +53,7 @@ class DeltaToMarkdown extends Converter<Delta, String>
     Map<String, EmbedToMarkdown>? customEmbedHandlers,
     Map<String, CustomAttributeHandler>? customTextAttrsHandlers,
     this.visitLineHandleNewLine,
+    this.customContentHandler = escapeSpecialCharacters,
   }) {
     if (customEmbedHandlers != null) {
       _embedHandlers.addAll(customEmbedHandlers);
@@ -67,6 +71,10 @@ class DeltaToMarkdown extends Converter<Delta, String>
 
   /// allows custom handling of adding new lines to quill Markdown string
   final DeltaToMarkdownVisitLineHandleNewLine? visitLineHandleNewLine;
+
+  /// allows overriding default behavior of the contentHandler in [_handleAttribute]
+  /// which is responsible for special characters escaping, e.g.: `_` becomes `\_`
+  final CustomContentHandler customContentHandler;
 
   @override
   String convert(Delta input) {
@@ -263,24 +271,12 @@ class DeltaToMarkdown extends Converter<Delta, String>
   @override
   StringSink visitText(QuillText text, [StringSink? output]) {
     final out = output ??= StringBuffer();
-    final style = text.style;
+
     _handleAttribute(
       _textAttrsHandlers,
       text,
       output,
-      () {
-        var content = text.value;
-        if (!(style.containsKey(Attribute.codeBlock.key) ||
-            style.containsKey(Attribute.inlineCode.key) ||
-            (text.parent?.style.containsKey(Attribute.codeBlock.key) ??
-                false))) {
-          content = content.replaceAllMapped(
-              RegExp(r'[\\\`\*\_\{\}\[\]\(\)\#\+\-\.\!\>\<]'), (match) {
-            return '\\${match[0]}';
-          });
-        }
-        out.write(content);
-      },
+      () => customContentHandler(text, out),
       sortedAttrsBySpan: true,
     );
     return out;
@@ -326,6 +322,40 @@ class DeltaToMarkdown extends Converter<Delta, String>
         output,
       );
     }
+  }
+
+  /// escapes any markdown characters during markdown serialization to avoid
+  /// breaking syntax
+  static void escapeSpecialCharacters(QuillText text, StringSink out) {
+    final style = text.style;
+    var content = text.value;
+    if (!(style.containsKey(Attribute.codeBlock.key) ||
+        style.containsKey(Attribute.inlineCode.key) ||
+        (text.parent?.style.containsKey(Attribute.codeBlock.key) ?? false))) {
+      content = content.replaceAllMapped(
+          RegExp(r'[\\\`\*\_\{\}\[\]\(\)\#\+\-\.\!\>\<]'), (match) {
+        return '\\${match[0]}';
+      });
+    }
+    out.write(content);
+  }
+
+  /// escapes markdown characters during markdown serialization but tries
+  /// to avoid escaping characters when text is not formatted at all
+  static void escapeSpecialCharactersRelaxed(QuillText text, StringSink out) {
+    final style = text.style;
+    var content = text.value;
+    if (!(style.containsKey(Attribute.codeBlock.key) ||
+        style.containsKey(Attribute.inlineCode.key) ||
+        (text.parent?.style.containsKey(Attribute.codeBlock.key) ?? false))) {
+      if (style.attributes.isNotEmpty) {
+        content = content.replaceAllMapped(
+            RegExp(r'[\\\`\*\_\{\}\[\]\(\)\#\+\-\.\!\>\<]'), (match) {
+          return '\\${match[0]}';
+        });
+      }
+    }
+    out.write(content);
   }
 }
 
