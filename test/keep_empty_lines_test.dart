@@ -3,6 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:markdown/markdown.dart' as md;
 import 'package:markdown_quill/markdown_quill.dart';
 
+import 'utils/keep_empty_line_block_syntax.dart';
+
 final _mdDocument = md.Document(
   encodeHtml: false,
   blockSyntaxes: [const KeepEmptyLineBlockSyntax()],
@@ -65,18 +67,4 @@ void _verify(String input) {
   final reMarkdown = _deltaToMd.convert(document.toDelta());
 
   expect(reMarkdown, input);
-}
-
-class KeepEmptyLineBlockSyntax extends md.BlockSyntax {
-  @override
-  RegExp get pattern => RegExp(r'^(?:[ \t]*)$');
-
-  const KeepEmptyLineBlockSyntax();
-
-  @override
-  md.Node? parse(md.BlockParser parser) {
-    parser.advance();
-
-    return md.Element.text('p', '');
-  }
 }
