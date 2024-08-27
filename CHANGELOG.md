@@ -1,3 +1,7 @@
+## 4.1.0
+
+* Add `DeltaToMarkdown.customContentHandler` that allows you to configure how special characters are escaped
+
 ## 4.0.0
 
 
