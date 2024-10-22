@@ -1,3 +1,7 @@
+## 4.2.0
+
+* Fix `softLineBreak` not respected when a new line is starting with a link [#34](https://github.com/TarekkMA/markdown_quill/issues/34)
+
 ## 4.1.0
 
 * Add `DeltaToMarkdown.customContentHandler` that allows you to configure how special characters are escaped
