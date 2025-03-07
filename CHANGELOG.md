@@ -1,3 +1,7 @@
+## 4.3.0
+
+* Upgrade to flutter_quill: 11.0.0
+
 ## 4.2.0
 
 * Fix `softLineBreak` not respected when a new line is starting with a link [#34](https://github.com/TarekkMA/markdown_quill/issues/34)
