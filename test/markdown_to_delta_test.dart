@@ -1501,13 +1501,71 @@ The number of windows in my house is
     test('test 1', () {
       mdToDeltaCheck('''
 - [ ] Dads
-- [x] 1212 
+- [x] 1212
     ''', [
         Operation.insert('Dads'),
         Operation.insert('\n', [Attribute.unchecked].toJson()),
         Operation.insert('1212'),
         Operation.insert('\n', [Attribute.checked].toJson()),
       ]);
+    });
+  });
+
+  group('HTML entity decoding', () {
+    // Use default markdown document (encodeHtml: true) to test entity decoding
+    final mdDocWithHtmlEncoding = md.Document(
+      extensionSet: md.ExtensionSet.gitHubFlavored,
+    );
+    final converterWithHtmlEncoding = MarkdownToDelta(
+      markdownDocument: mdDocWithHtmlEncoding,
+    );
+
+    test('decodes ampersand entity', () {
+      final result = converterWithHtmlEncoding.convert('Test 3&4 text');
+      expect(result.toList(), fromOps([
+        Operation.insert('Test 3&4 text'),
+        Operation.insert('\n'),
+      ]));
+    });
+
+    test('decodes less than and greater than entities', () {
+      final result = converterWithHtmlEncoding.convert('a < b > c');
+      expect(result.toList(), fromOps([
+        Operation.insert('a < b > c'),
+        Operation.insert('\n'),
+      ]));
+    });
+
+    test('decodes quote entities', () {
+      final result = converterWithHtmlEncoding.convert('He said "hello" and \'goodbye\'');
+      expect(result.toList(), fromOps([
+        Operation.insert("He said \"hello\" and 'goodbye'"),
+        Operation.insert('\n'),
+      ]));
+    });
+
+    test('decodes multiple entities in one string', () {
+      final result = converterWithHtmlEncoding.convert('Tom & Jerry <3 "cheese"');
+      expect(result.toList(), fromOps([
+        Operation.insert('Tom & Jerry <3 "cheese"'),
+        Operation.insert('\n'),
+      ]));
+    });
+
+    test('decodes entities in code blocks', () {
+      final result = converterWithHtmlEncoding.convert('```\nif (a < b && c > d)\n```');
+      expect(result.toList(), fromOps([
+        Operation.insert('if (a < b && c > d)'),
+        Operation.insert('\n', Attribute.codeBlock.toJson()),
+      ]));
+    });
+
+    test('decodes entities in block quotes', () {
+      final result = converterWithHtmlEncoding.convert('> Tom & Jerry');
+      expect(result.toList(), fromOps([
+        Operation.insert('Tom & Jerry'),
+        Operation.insert('\n', Attribute.blockQuote.toJson()),
+      ]));
     });
   });
 }

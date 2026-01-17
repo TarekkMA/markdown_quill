@@ -163,6 +163,9 @@ class MarkdownToDelta extends Converter<String, Delta>
       renderedText = _trimTextToMdSpec(text.text);
     }
 
+    // Decode HTML entities to their original characters since Delta is plain text
+    renderedText = _decodeHtmlEntities(renderedText);
+
     if (renderedText.contains('\n')) {
       var lines = renderedText.split('\n');
       if (renderedText.endsWith('\n')) {
@@ -359,6 +362,18 @@ class MarkdownToDelta extends Converter<String, Delta>
       for (final attrs in _activeInlineAttributes)
         for (final a in attrs) ...a.toJson(),
     };
+  }
+
+  // Decode HTML entities back to their original characters.
+  // The markdown parser escapes special characters to HTML entities as per
+  // CommonMark spec, but Quill Delta is plain text and needs the original chars.
+  String _decodeHtmlEntities(String text) {
+    return text
+        .replaceAll('&amp;', '&')
+        .replaceAll('&lt;', '<')
+        .replaceAll('&gt;', '>')
+        .replaceAll('&quot;', '"')
+        .replaceAll('&#39;', "'");
   }
 
   // Define trim text function to remove spaces from text elements in
