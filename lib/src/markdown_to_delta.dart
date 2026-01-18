@@ -264,6 +264,12 @@ class MarkdownToDelta extends Converter<String, Delta>
   }
 
   void _insertNewLineBeforeElementIfNeeded(md.Element element) {
+    // make sure this is not the first element
+    // in all other cases add a new line before p
+    if (_lastTag != null && element.tag == 'p') {
+      _delta.insert('\n');
+    }
+
     if (!_isInBlockQuote &&
         _lastTag == 'blockquote' &&
         element.tag == 'blockquote') {
